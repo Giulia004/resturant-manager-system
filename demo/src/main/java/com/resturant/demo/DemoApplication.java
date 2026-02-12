@@ -18,6 +18,7 @@ import com.resturant.demo.model.Tavolo;
 import com.resturant.demo.model.Order;
 
 import java.util.List;
+
 @SpringBootApplication
 public class DemoApplication {
 
@@ -26,64 +27,72 @@ public class DemoApplication {
 	}
 
 	@Bean
-	CommandLineRunner run(UserRepository userRepository, PizzaRepository pizzaRepository,
-			TavoloRepository tavoloRepository, OrderRepository orderRepository,PasswordEncoder passwordEncoder) {
+	public PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
+
+	@Bean
+	CommandLineRunner run(UserRepository userRepository,
+			PizzaRepository pizzaRepository,
+			TavoloRepository tavoloRepository,
+			OrderRepository orderRepository,
+			PasswordEncoder passwordEncoder) {
 		return args -> {
-			if (userRepository.findByUsername("admin").isEmpty()) {
-				User admin = new User();
-				admin.setUsername("admin");
-				admin.setPassword(passwordEncoder.encode("admin"));
-				admin.setRole(Role.ADMIN);
-				userRepository.save(admin);
-			} else {
-				System.out.println("Admin user already exists");
-			}
 
-			//Create pizzas
+			// 1. GESTIONE UTENTI (Reset per garantire BCrypt)
+			// Invece di cancellare, cerchiamo e aggiorniamo la password
+			creaOAggiornaUser(userRepository, passwordEncoder, "admin", Role.ADMIN);
+			creaOAggiornaUser(userRepository, passwordEncoder, "admin2", Role.ADMIN);
+
+			// 2. CREAZIONE PIZZE
 			if (pizzaRepository.count() == 0) {
-				Pizza margherita = new Pizza(null, "Margherita", List.of("Tomato", "Mozzarella", "Basil"), 5.0);
-				Pizza pepperoni = new Pizza(null, "Pepperoni", List.of("Tomato", "Mozzarella", "Pepperoni"), 6.5);
-				Pizza veggie = new Pizza(null, "Veggie",
-						List.of("Tomato", "Mozzarella", "Bell Peppers", "Onions", "Olives"), 7.0);
-				pizzaRepository.saveAll(List.of(margherita, pepperoni, veggie));
-				System.out.println("Sample pizzas created");
-			} else {
-				System.out.println("Pizzas already exist");
+				pizzaRepository.saveAll(List.of(
+						new Pizza(null, "Margherita", List.of("Pomodoro", "Mozzarella", "Basilico"), 5.0),
+						new Pizza(null, "Pepperoni", List.of("Pomodoro", "Mozzarella", "Salamino"), 6.5),
+						new Pizza(null, "Veggie", List.of("Pomodoro", "Mozzarella", "Verdure"), 7.0)));
+				System.out.println(">> Pizze create correttamente");
 			}
 
+			// 3. CREAZIONE TAVOLI
 			if (tavoloRepository.count() == 0) {
 				tavoloRepository.saveAll(List.of(
-						new Tavolo(null, 1, 4),
-						new Tavolo(null, 2, 2),
-						new Tavolo(null, 3, 6)));
-				System.out.println("Sample tables created");
-			} else {
-				System.out.println("Tables already exist");
+						new Tavolo(null, 1, 4, "LIBERO"),
+						new Tavolo(null, 2, 2, "OCCUPATO"),
+						new Tavolo(null, 3, 6, "LIBERO")));
+				System.out.println(">> Tavoli creati correttamente");
 			}
 
+			// 4. ORDINE DI ESEMPIO
 			if (orderRepository.count() == 0) {
-				User cameriere = userRepository.findByUsername("ADMIN").get(); // esempio: admin come cameriere
-				Tavolo tavolo1 = tavoloRepository.findById(1L).get();
-				List<Pizza> ordinePizze = pizzaRepository.findAll().subList(0, 2); // esempio: prime 2 pizze
+				// Recuperiamo l'utente creato sopra (sicuri che esista ora)
+				User cameriere = userRepository.findByUsername("admin")
+						.orElseThrow(() -> new RuntimeException("Admin non trovato per l'ordine"));
+
+				// Recuperiamo il tavolo 1 (usiamo findAll per sicurezza se gli ID non partono
+				// da 1)
+				Tavolo tavolo1 = tavoloRepository.findAll().get(0);
+				List<Pizza> primePizze = pizzaRepository.findAll().subList(0, 2);
 
 				Order ordine1 = new Order();
 				ordine1.setCameriere(cameriere);
 				ordine1.setTavolo(tavolo1);
 				ordine1.setStatus("In preparazione");
-				ordine1.setPizzas(ordinePizze);
-				ordine1.setTotalPrice(ordinePizze.stream().mapToDouble(Pizza::getPrice).sum());
+				ordine1.setPizzas(primePizze);
+				ordine1.setTotalPrice(primePizze.stream().mapToDouble(Pizza::getPrice).sum());
 
 				orderRepository.save(ordine1);
-
-				System.out.println("Ordine di esempio creato");
-			} else {
-				System.out.println("Ordini già presenti");
+				System.out.println(">> Ordine di esempio creato correttamente");
 			}
 		};
 	}
-	
-	@Bean
-	public PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
+
+	// Metodo helper per non duplicare codice e non rompere i vincoli del DB
+	private void creaOAggiornaUser(UserRepository repo, PasswordEncoder encoder, String username, Role role) {
+		User user = repo.findByUsername(username).orElse(new User());
+		user.setUsername(username);
+		user.setPassword(encoder.encode("admin")); // Sovrascrive sempre con "admin" criptato
+		user.setRole(role);
+		repo.save(user);
+		System.out.println(">> Utente " + username + " pronto (Password: admin)");
 	}
 }

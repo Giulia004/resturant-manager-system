@@ -18,4 +18,7 @@ public class Tavolo {
 
     @Column(nullable = false)
     private int posti;
+
+    @Column(nullable =false)
+    public String status;
 }

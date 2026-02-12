@@ -1,5 +1,5 @@
 package com.resturant.demo.model;
 
 public enum Role {
-    ADMIN,CAMERIERE,CUCINA,CASSA
+    ADMIN,CAMERIERE,CUCINA,CASSA,USER,FORNITORE
 }

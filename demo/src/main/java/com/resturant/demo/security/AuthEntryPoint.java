@@ -1,5 +1,25 @@
 package com.resturant.demo.security;
 
-public class AuthEntryPoint {
-    
+import java.io.IOException;
+import java.io.Serializable;
+
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.stereotype.Component;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+@Component
+public class AuthEntryPoint implements AuthenticationEntryPoint, Serializable {
+
+    //private static final long serialVersionUUID = -8970718410437077606L;
+
+    @Override
+    public void commence(HttpServletRequest request, HttpServletResponse response,
+            AuthenticationException authException) throws IOException {
+
+        // Risposta quando l'utente non è autenticato
+        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Error: Unauthorized");
+    }
 }
