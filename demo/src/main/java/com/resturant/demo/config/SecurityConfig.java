@@ -1,5 +1,6 @@
 package com.resturant.demo.config;
 
+import com.resturant.demo.model.Role;
 import com.resturant.demo.security.AuthEntryPoint;
 import com.resturant.demo.security.JwtFilter;
 import com.resturant.demo.service.CustomUserDetailsService;
@@ -47,7 +48,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/pizze/**").hasAnyAuthority("CUCINA", "ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/pizze/**").hasAnyAuthority("CUCINA", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/pizze/**").hasAuthority("ADMIN")
-                        .requestMatchers("/api/tavoli/**").hasAnyAuthority("CAMERIERE", "ADMIN")
+                        .requestMatchers("/api/tavoli/**").hasAnyAuthority(Role.CAMERIERE.name(), Role.ADMIN.name())
                         .requestMatchers("/api/orders/**").hasAnyAuthority("CAMERIERE", "CUCINA", "ADMIN")
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
@@ -62,7 +63,7 @@ public class SecurityConfig {
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
         config.setAllowCredentials(true);
-        config.setMaxAge(3600L); // Cache del preflight per un'ora
+        config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);

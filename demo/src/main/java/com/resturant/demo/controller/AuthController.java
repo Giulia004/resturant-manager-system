@@ -29,10 +29,10 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request) {
         if (userRepository.findByUsername(request.username()).isPresent()) {
-            return ResponseEntity.badRequest().body(new AuthResponse("Username già in uso", null));
+            return ResponseEntity.badRequest().body(new AuthResponse("Username già in uso", null, null));
         }
-        
-        //Create new User
+
+        // Create new User
         User newUser = new User();
         newUser.setUsername(request.username());
         newUser.setPassword(passwordEncoder.encode(request.psw()));
@@ -41,22 +41,23 @@ public class AuthController {
 
         String token = jwtUtils.generateToken(newUser.getUsername());
 
-        return ResponseEntity.ok(new AuthResponse(token, newUser.getRole().name()));
+        return ResponseEntity.ok(new AuthResponse(token, newUser.getRole().name(), newUser.getUsername()));
     }
+
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
         System.out.println("Tentativo di login: " + request.username());
-        System.out.println("Password: "+request.psw());
+        System.out.println("Password: " + request.psw());
         // 1. Tenta l'autenticazione
-        try {//Autenticazione
+        try {// Autenticazione
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.username(), request.psw()));
         } catch (Exception e) {
-            //Eccezione lanciata nel caso le credenziali siano errate
-            return ResponseEntity.status(401).body(new AuthResponse("Credenziali non valide", null));
+            // Eccezione lanciata nel caso le credenziali siano errate
+            return ResponseEntity.status(401).body(new AuthResponse("Credenziali non valide", null, null));
         }
 
-        //Recupero dell'utente dal DB
+        // Recupero dell'utente dal DB
         User user = userRepository.findByUsername(request.username())
                 .orElseThrow(() -> new RuntimeException("Utente non trovato"));
 
@@ -65,6 +66,6 @@ public class AuthController {
 
         // 4. Rispondiamo al frontend con il token e il ruolo (utile per React per
         // sapere cosa mostrare)
-        return ResponseEntity.ok(new AuthResponse(token, user.getRole().name()));
+        return ResponseEntity.ok(new AuthResponse(token, user.getRole().name(), user.getUsername()));
     }
 }

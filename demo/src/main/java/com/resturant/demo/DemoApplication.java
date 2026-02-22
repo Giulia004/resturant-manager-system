@@ -7,92 +7,100 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import com.resturant.demo.repository.PizzaRepository;
-import com.resturant.demo.repository.UserRepository;
-import com.resturant.demo.repository.OrderRepository;
-import com.resturant.demo.repository.TavoloRepository;
-import com.resturant.demo.model.Pizza;
-import com.resturant.demo.model.Role;
-import com.resturant.demo.model.User;
-import com.resturant.demo.model.Tavolo;
-import com.resturant.demo.model.Order;
+import com.resturant.demo.repository.*;
+import com.resturant.demo.model.*;
 
 import java.util.List;
 
 @SpringBootApplication
 public class DemoApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(DemoApplication.class, args);
-	}
+        public static void main(String[] args) {
+                SpringApplication.run(DemoApplication.class, args);
+        }
 
-	@Bean
-	public PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
-	}
+        @Bean
+        public PasswordEncoder passwordEncoder() {
+                return new BCryptPasswordEncoder();
+        }
 
-	@Bean
-	CommandLineRunner run(UserRepository userRepository,
-			PizzaRepository pizzaRepository,
-			TavoloRepository tavoloRepository,
-			OrderRepository orderRepository,
-			PasswordEncoder passwordEncoder) {
-		return args -> {
+        @Bean
+        CommandLineRunner run(UserRepository userRepository,
+                        ProductRepository productRepository,
+                        TavoloRepository tavoloRepository,
+                        PasswordEncoder passwordEncoder) {
+                return args -> {
 
-			// 1. GESTIONE UTENTI (Reset per garantire BCrypt)
-			// Invece di cancellare, cerchiamo e aggiorniamo la password
-			creaOAggiornaUser(userRepository, passwordEncoder, "admin", Role.ADMIN);
-			creaOAggiornaUser(userRepository, passwordEncoder, "admin2", Role.ADMIN);
+                        // 1. GESTIONE UTENTI (Admin e Cameriere)
+                        creaOAggiornaUser(userRepository, passwordEncoder, "admin", Role.ADMIN);
+                        creaOAggiornaUser(userRepository, passwordEncoder, "cameriere1", Role.CAMERIERE);
+                        // Utente specifico per il tablet fisso del Tavolo 1
+                        creaOAggiornaUser(userRepository, passwordEncoder, "tavolo1", Role.USER);
 
-			// 2. CREAZIONE PIZZE
-			if (pizzaRepository.count() == 0) {
-				pizzaRepository.saveAll(List.of(
-						new Pizza(null, "Margherita", List.of("Pomodoro", "Mozzarella", "Basilico"), 5.0),
-						new Pizza(null, "Pepperoni", List.of("Pomodoro", "Mozzarella", "Salamino"), 6.5),
-						new Pizza(null, "Veggie", List.of("Pomodoro", "Mozzarella", "Verdure"), 7.0)));
-				System.out.println(">> Pizze create correttamente");
-			}
+                        if (productRepository.count() == 0) {
+                                productRepository.saveAll(List.of(
+                                                // PIZZE
+                                                new Prodotto(null, "Margherita", "Pomodoro, Mozzarella, Basilico", 6.5,
+                                                                true, Categoria.PIZZA),
+                                                new Prodotto(null, "Diavola", "Pomodoro, Mozzarella, Salamino piccante",
+                                                                8.0, true,
+                                                                Categoria.PIZZA),
+                                                new Prodotto(null, "Quattro Formaggi",
+                                                                "Mozzarella, Gorgonzola, Fontina, Parmigiano", 9.5,
+                                                                true,
+                                                                Categoria.PIZZA),
 
-			// 3. CREAZIONE TAVOLI
-			if (tavoloRepository.count() == 0) {
-				tavoloRepository.saveAll(List.of(
-						new Tavolo(null, 1, 4, "LIBERO"),
-						new Tavolo(null, 2, 2, "OCCUPATO"),
-						new Tavolo(null, 3, 6, "LIBERO")));
-				System.out.println(">> Tavoli creati correttamente");
-			}
+                                                // PRIMI
+                                                new Prodotto(null, "Spaghetti alla Carbonara",
+                                                                "Guanciale, Uovo, Pecorino", 12.0, true,
+                                                                Categoria.PRIMI),
+                                                new Prodotto(null, "Lasagna alla Bolognese",
+                                                                "Ragù di carne e besciamella", 11.0, true,
+                                                                Categoria.PRIMI),
 
-			// 4. ORDINE DI ESEMPIO
-			if (orderRepository.count() == 0) {
-				// Recuperiamo l'utente creato sopra (sicuri che esista ora)
-				User cameriere = userRepository.findByUsername("admin")
-						.orElseThrow(() -> new RuntimeException("Admin non trovato per l'ordine"));
+                                                // SECONDI
+                                                new Prodotto(null, "Tagliata di Manzo", "Rucola e scaglie di Grana",
+                                                                18.0, true,
+                                                                Categoria.SECONDI),
+                                                new Prodotto(null, "Cotoletta alla Milanese", "Con patatine fritte",
+                                                                14.0, true,
+                                                                Categoria.SECONDI),
 
-				// Recuperiamo il tavolo 1 (usiamo findAll per sicurezza se gli ID non partono
-				// da 1)
-				Tavolo tavolo1 = tavoloRepository.findAll().get(0);
-				List<Pizza> primePizze = pizzaRepository.findAll().subList(0, 2);
+                                                // BEVANDE
+                                                new Prodotto(null, "Acqua Minerale 1L", "Naturale o Frizzante", 2.5,
+                                                                true, Categoria.BEVANDA),
+                                                new Prodotto(null, "Birra Media 0.4L", "Bionda alla spina", 5.0, true,
+                                                                Categoria.BEVANDA),
+                                                new Prodotto(null, "Vino della Casa 0.5L", "Rosso o Bianco", 6.0, true,
+                                                                Categoria.BEVANDA),
 
-				Order ordine1 = new Order();
-				ordine1.setCameriere(cameriere);
-				ordine1.setTavolo(tavolo1);
-				ordine1.setStatus("In preparazione");
-				ordine1.setPizzas(primePizze);
-				ordine1.setTotalPrice(primePizze.stream().mapToDouble(Pizza::getPrice).sum());
+                                                // DESSERT
+                                                new Prodotto(null, "Tiramisù Artigianale", "Al caffè e mascarpone", 5.5,
+                                                                true,
+                                                                Categoria.DESSERT),
+                                                new Prodotto(null, "Panna Cotta", "Ai frutti di bosco", 5.0, true,
+                                                                Categoria.DESSERT)));
+                        }
 
-				orderRepository.save(ordine1);
-				System.out.println(">> Ordine di esempio creato correttamente");
-			}
-		};
-	}
+                        // 3. CREAZIONE TAVOLI
+                        if (tavoloRepository.count() == 0) {
+                                User user1 = userRepository.findByUsername("tavolo1").orElseThrow();
+                                tavoloRepository.saveAll(List.of(
+                                                new Tavolo(null, 1, 4, "LIBERO", user1.getId()),
+                                                new Tavolo(null, 2, 2, "LIBERO", null),
+                                                new Tavolo(null, 3, 6, "LIBERO", null),
+                                                new Tavolo(null, 4, 4, "LIBERO", null),
+                                                new Tavolo(null, 5, 10, "LIBERO", null)));
+                        }
+                };
+        }
 
-	// Metodo helper per non duplicare codice e non rompere i vincoli del DB
-	private void creaOAggiornaUser(UserRepository repo, PasswordEncoder encoder, String username, Role role) {
-		User user = repo.findByUsername(username).orElse(new User());
-		user.setUsername(username);
-		user.setPassword(encoder.encode("admin")); // Sovrascrive sempre con "admin" criptato
-		user.setRole(role);
-		repo.save(user);
-		System.out.println(">> Utente " + username + " pronto (Password: admin)");
-	}
+        private void creaOAggiornaUser(UserRepository repo, PasswordEncoder encoder, String username, Role role) {
+                User user = repo.findByUsername(username).orElse(new User());
+                user.setUsername(username);
+                user.setPassword(encoder.encode("password123")); // Password di default per i test
+                user.setRole(role);
+                repo.save(user);
+                System.out.println(">> Utente pronto: " + username + " (Password: password123)");
+        }
 }

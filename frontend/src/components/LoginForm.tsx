@@ -1,5 +1,5 @@
 // src/components/LoginForm.tsx
-import { useState } from "react";
+import React, { useState } from "react";
 import { login } from "../api/auth/authService";
 
 export const LoginForm = () => {
@@ -32,9 +32,9 @@ export const LoginForm = () => {
   return (
     <div style={styles.page}>
       <div style={styles.card}>
-        <div style={styles.icon}>🍕</div>
-
-        <h2 style={styles.title}>Ristorante Login</h2>
+        <div style={styles.iconCircle}>🍕</div>
+        <h2 style={styles.title}>Bentornato</h2>
+        <p style={styles.subtitle}>Accedi al gestionale</p>
 
         <form onSubmit={handleSubmit} style={styles.form}>
           <input
@@ -79,56 +79,76 @@ const styles: { [key: string]: React.CSSProperties } = {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    background: "linear-gradient(135deg, #fff3e6, #ffe0cc)",
+    background: "linear-gradient(135deg, #fff8f0 0%, #ffeacc 100%)",
     fontFamily: "'Poppins', sans-serif",
   },
 
   card: {
     backgroundColor: "#fff",
-    padding: "40px",
-    borderRadius: "24px",
-    width: "350px",
-    boxShadow: "0 15px 35px rgba(0,0,0,0.1)",
+    padding: "40px 30px",
+    borderRadius: "20px",
+    width: "100%",
+    maxWidth: "400px",
+    boxShadow: "0 20px 40px rgba(230, 126, 34, 0.1)",
     textAlign: "center",
+    border: "1px solid rgba(230, 126, 34, 0.05)"
   },
 
-  icon: {
-    fontSize: "3rem",
-    marginBottom: "10px",
+  iconCircle: {
+    width: "70px",
+    height: "70px",
+    backgroundColor: "#fff3e0",
+    borderRadius: "50%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: "32px",
+    margin: "0 auto 20px auto",
+    boxShadow: "0 4px 15px rgba(230, 126, 34, 0.15)"
   },
 
   title: {
-    marginBottom: "25px",
+    margin: "0 0 5px 0",
     fontSize: "1.8rem",
-    fontWeight: 700,
-    color: "#1a1a1a",
+    fontWeight: 800,
+    color: "#2c3e50",
+  },
+
+  subtitle: {
+    margin: "0 0 30px 0",
+    color: "#7f8c8d",
+    fontSize: "0.95rem"
   },
 
   form: {
     display: "flex",
     flexDirection: "column",
-    gap: "15px",
+    gap: "20px",
   },
 
   input: {
-    padding: "12px 15px",
+    padding: "15px",
     borderRadius: "12px",
-    border: "1px solid #ddd",
-    fontSize: "0.9rem",
+    border: "2px solid #f0f0f0",
+    fontSize: "1rem",
     outline: "none",
     transition: "all 0.2s ease",
+    backgroundColor: "#f9f9f9",
+    color: "#2c3e50"
   },
 
   button: {
     marginTop: "10px",
-    padding: "12px",
+    padding: "15px",
     borderRadius: "12px",
     border: "none",
     backgroundColor: "#e67e22",
     color: "#fff",
-    fontWeight: 700,
+    fontWeight: 800,
+    fontSize: "1rem",
     cursor: "pointer",
     transition: "all 0.3s ease",
+    boxShadow: "0 4px 15px rgba(230, 126, 34, 0.3)"
   },
 
   message: {

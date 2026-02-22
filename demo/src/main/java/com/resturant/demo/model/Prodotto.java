@@ -25,7 +25,7 @@ public class Prodotto {
     private Double prezzo;
 
     @Column(nullable = false)
-    private Boolean disponibile = true;
+    private boolean disponibile = true;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

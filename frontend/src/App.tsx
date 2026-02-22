@@ -1,28 +1,35 @@
 // src/App.tsx
 import React, { useState } from "react";
-import { register, login, logout, type AuthResponse } from "./api/auth/authService";
-import Home from "./components/Home";
-import Menu from "./components/Menu"; // Assicurati che il percorso sia corretto
+import { login, logout, type AuthResponse } from "./api/auth/authService";
+import Menu from "./components/Menu";
+import Dashboard from "./pages/Dashboard";
+import ControlPanel from "./pages/ControlPanel";
 
 function App() {
   const [username, setUsername] = useState("");
   const [psw, setPsw] = useState("");
   const [message, setMessage] = useState("");
-  const [isLoginView, setIsLoginView] = useState(true);
 
-  // Gestione della vista: 'login', 'home' o 'menu'
-  const [view, setView] = useState<"login" | "home" | "menu">(
-    localStorage.getItem("token") ? "home" : "login"
+  // Gestione della view
+  const [view, setView] = useState<"login" | "home" | "menu" | "controlpanel">(
+    localStorage.getItem("token") ? (localStorage.getItem("role") === "USER" ? "menu" : "home") : "login"
   );
 
   const handleAction = async () => {
     try {
-      const response: AuthResponse = isLoginView
-        ? await login({ username, psw })
-        : await register({ username, psw });
-
+      const response: AuthResponse = await login({ username, psw });
       if (response.token) {
-        setView("home"); // Una volta loggato, vai alla Home
+        localStorage.setItem("token", response.token);
+        if (response.role)
+          localStorage.setItem("role", response.role);
+        if ((response as any).tableNumber) {
+          localStorage.setItem("tableNumber", (response as any).tableNumber);
+        }
+        if (response.role === "USER") {
+          setView("menu");
+        } else {
+          setView("home");
+        }
         setMessage("");
       } else {
         setMessage("Credenziali non valide o errore server.");
@@ -41,6 +48,7 @@ function App() {
 
   // Recuperiamo il token per passarlo al Menu
   const token = localStorage.getItem("token") || "";
+  const tableNumber = localStorage.getItem("tableNumber");
 
   // --- RENDERING CONDIZIONALE ---
 
@@ -48,10 +56,11 @@ function App() {
   if (view === "menu") {
     return (
       <div style={styles.fullPageContainer}>
-        {/* Usiamo una card più larga per il menu */}
-        <div style={{ ...styles.card, maxWidth: "800px", width: "95%" }}>
-          <Menu token={token} onBack={() => setView("home")} />
-        </div>
+        <Menu
+          token={token}
+          tableNumber={tableNumber ? parseInt(tableNumber) : undefined}
+          onBack={() => setView("home")}
+        />
       </div>
     );
   }
@@ -59,19 +68,29 @@ function App() {
   // 2. Schermata HOME
   if (view === "home") {
     return (
-      <Home
+      <Dashboard
         onLogout={handleLogout}
-        onPizzaClick={() => setView("menu")}
+        onMenuClick={() => setView("menu")}
+        onControlPanelClick={() => setView("controlpanel")}
       />
     );
   }
 
-  // 3. Schermata LOGIN (default)
+  if (view === "controlpanel") {
+    return (
+      <div style={styles.fullPageContainer}>
+        <div style={styles.panelContainer}>
+          <ControlPanel onBack={() => setView("home")} />
+        </div>
+      </div>
+    );
+  }
+  // 3. Schermata LOGIN
   return (
     <div style={styles.fullPageContainer}>
       <div style={styles.card}>
         <div style={styles.iconCircle}>🍕</div>
-        <h2 style={styles.title}>{isLoginView ? "Ristorante Login" : "Nuovo Account"}</h2>
+        <h2 style={styles.title}>Ristorante Login</h2>
 
         <div style={styles.inputGroup}>
           <input
@@ -91,15 +110,8 @@ function App() {
         </div>
 
         <button onClick={handleAction} style={styles.primaryButton}>
-          {isLoginView ? "ACCEDI" : "REGISTRATI"}
+          ACCEDI
         </button>
-
-        <div style={styles.switchText}>
-          {isLoginView ? "Ancora non sei dei nostri?" : "Hai già un account?"}
-          <span onClick={() => setIsLoginView(!isLoginView)} style={styles.link}>
-            {isLoginView ? " Registrati" : " Accedi"}
-          </span>
-        </div>
 
         {message && <div style={styles.message}>{message}</div>}
       </div>
@@ -110,100 +122,122 @@ function App() {
 const styles: { [key: string]: React.CSSProperties } = {
 
   fullPageContainer: {
-    position: "fixed",
-    top: 0,
-    left: 0,
-    width: "100vw",
-    height: "100vh",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    background: "linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)",
+    minHeight: "100vh",
+    width: "100%",
+    background: "linear-gradient(135deg, #e67e22 0%, #f39c12 100%)",
     fontFamily: "'Poppins', sans-serif",
+    padding: "20px",
   },
 
   card: {
-    background: "#ffffff",
+    background: "rgba(255, 255, 255, 0.85)",
+    backdropFilter: "blur(15px)",
+    WebkitBackdropFilter: "blur(15px)",
     padding: "50px 40px",
-    borderRadius: "28px",
-    width: "380px",
-    boxShadow: "0 20px 50px rgba(0,0,0,0.15)",
+    borderRadius: "30px",
+    width: "100%",
+    maxWidth: "420px",
+    boxShadow: "0 25px 60px rgba(0,0,0,0.15)",
     textAlign: "center",
-    transition: "transform 0.3s ease",
+    transition: "all 0.4s ease",
   },
 
   iconCircle: {
-    width: "70px",
-    height: "70px",
-    margin: "0 auto 20px auto",
+    width: "80px",
+    height: "80px",
+    margin: "0 auto 25px auto",
     borderRadius: "50%",
-    background: "linear-gradient(135deg, #ff9966, #ff5e62)",
+    background: "linear-gradient(135deg, #d35400, #e67e22)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    fontSize: "2rem",
+    fontSize: "2.2rem",
     color: "#fff",
-    boxShadow: "0 10px 25px rgba(255,94,98,0.4)",
+    boxShadow: "0 10px 20px rgba(230, 126, 34, 0.3)",
   },
 
   title: {
-    fontSize: "1.8rem",
+    fontSize: "2rem",
     fontWeight: 700,
-    marginBottom: "30px",
-    color: "#222",
+    marginBottom: "35px",
+    color: "#333",
+    letterSpacing: "1px",
   },
 
   inputGroup: {
     display: "flex",
     flexDirection: "column",
-    gap: "15px",
-    marginBottom: "25px",
+    gap: "18px",
+    marginBottom: "30px",
   },
 
   input: {
-    padding: "14px 18px",
-    borderRadius: "14px",
-    border: "1px solid #ddd",
-    fontSize: "0.95rem",
+    padding: "15px 20px",
+    borderRadius: "16px",
+    border: "1px solid rgba(0,0,0,0.1)",
+    fontSize: "1rem",
     outline: "none",
     transition: "all 0.3s ease",
+    background: "#ffffff",
+    color: "#333",
   },
 
   primaryButton: {
     width: "100%",
-    padding: "14px",
-    borderRadius: "14px",
+    padding: "15px",
+    borderRadius: "16px",
     border: "none",
-    background: "linear-gradient(135deg, #ff5e62, #ff9966)",
+    background: "linear-gradient(135deg, #e67e22, #d35400)",
     color: "#fff",
     fontWeight: 700,
-    fontSize: "0.95rem",
+    fontSize: "1rem",
     cursor: "pointer",
-    boxShadow: "0 10px 25px rgba(255,94,98,0.4)",
+    boxShadow: "0 10px 20px rgba(230, 126, 34, 0.3)",
     transition: "all 0.3s ease",
   },
 
   switchText: {
-    marginTop: "20px",
-    fontSize: "0.85rem",
+    marginTop: "25px",
+    fontSize: "0.9rem",
     color: "#555",
   },
 
   link: {
-    marginLeft: "5px",
-    color: "#ff5e62",
+    marginLeft: "6px",
+    color: "#e67e22",
     fontWeight: 600,
     cursor: "pointer",
   },
 
   message: {
     marginTop: "20px",
-    padding: "10px",
-    borderRadius: "10px",
+    padding: "12px",
+    borderRadius: "12px",
     backgroundColor: "#ffe6e6",
     color: "#d63031",
-    fontSize: "0.85rem",
+    fontSize: "0.9rem",
     fontWeight: 600,
+  },
+  panelContainer: {
+    width: "90%",
+    maxWidth: "1000px",
+    height: "80%",
+    backgroundColor: "rgba(255, 255, 255, 0.95)",
+    borderRadius: "20px",
+    padding: "2rem",
+    boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
+    backdropFilter: "blur(10px)",
+    overflowY: "auto",
+  },
+  menuWrapper: {
+    width: "100vw",
+    height: "100vh",
+    backgroundColor: "#f4f4f4",
+    display: "flex",
+    flexDirection: "column"
   },
 };
 export default App;

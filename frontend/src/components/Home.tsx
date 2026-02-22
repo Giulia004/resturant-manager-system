@@ -19,26 +19,38 @@ const Home: React.FC<HomeProps> = ({ onLogout, onPizzaClick }) => {
                 </header>
 
                 <div style={styles.grid}>
-                    <div style={styles.card}>
-                        <h3>📋 Ordini</h3>
-                        <p>Visualizza le comande attive</p>
+                    <div style={styles.card} className="hover-card">
+                        <div style={styles.iconBox}>📋</div>
+                        <div>
+                            <h3 style={styles.cardTitle}>Ordini</h3>
+                            <p style={styles.cardText}>Visualizza le comande attive</p>
+                        </div>
                     </div>
 
                     {/* AGGIUNTO onClick QUI */}
-                    <div style={styles.cardPizza} onClick={onPizzaClick}>
-                        <h3>🍕 Menù Pizze</h3>
-                        <p>Gestisci il listino</p>
+                    <div style={styles.cardPizza} onClick={onPizzaClick} className="hover-card">
+                        <div style={{ ...styles.iconBox, backgroundColor: 'rgba(255,255,255,0.2)' }}>🍕</div>
+                        <div>
+                            <h3 style={styles.cardTitle}>Menù Pizze</h3>
+                            <p style={{ ...styles.cardText, color: '#fff' }}>Gestisci il listino</p>
+                        </div>
                     </div>
 
-                    <div style={styles.card}>
-                        <h3>🪑 Tavoli</h3>
-                        <p>Stato della sala</p>
+                    <div style={styles.card} className="hover-card">
+                        <div style={styles.iconBox}>🪑</div>
+                        <div>
+                            <h3 style={styles.cardTitle}>Tavoli</h3>
+                            <p style={styles.cardText}>Stato della sala</p>
+                        </div>
                     </div>
 
                     {role === "ADMIN" && (
-                        <div style={{ ...styles.card, border: "2px solid #e67e22", backgroundColor: "#fff", color: "#2c3e50" }}>
-                            <h3>⚙️ Admin Panel</h3>
-                            <p>Gestione Utenti e Log</p>
+                        <div style={{ ...styles.card, border: "2px solid #e67e22" }} className="hover-card">
+                            <div style={styles.iconBox}>⚙️</div>
+                            <div>
+                                <h3 style={styles.cardTitle}>Admin Panel</h3>
+                                <p style={styles.cardText}>Gestione Utenti e Log</p>
+                            </div>
                         </div>
                     )}
                 </div>
@@ -71,13 +83,25 @@ const styles: { [key: string]: React.CSSProperties } = {
     },
     card: {
         padding: "1.5rem", borderRadius: "12px", backgroundColor: "#fff", color: "#2c3e50",
-        border: "1px solid #eee", textAlign: "left", cursor: "pointer", transition: "0.3s",
-        boxShadow: "0 4px 6px rgba(0,0,0,0.05)"
+        border: "none", textAlign: "left", cursor: "pointer",
+        boxShadow: "0 4px 15px rgba(0,0,0,0.05)",
+        display: "flex", alignItems: "center", gap: "15px"
     },
     cardPizza: {
         padding: "1.5rem", borderRadius: "12px", backgroundColor: "#fe6100", color: "#fff",
-        textAlign: "left", cursor: "pointer", transition: "0.3s",
-        boxShadow: "0 6px 12px rgba(0,0,0,0.15)"
+        textAlign: "left", cursor: "pointer",
+        boxShadow: "0 8px 20px rgba(254, 97, 0, 0.3)",
+        display: "flex", alignItems: "center", gap: "15px", border: "none"
+    },
+    iconBox: {
+        width: "50px", height: "50px", borderRadius: "12px", backgroundColor: "#f8f9fa",
+        display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.5rem"
+    },
+    cardTitle: {
+        margin: "0 0 5px 0", fontSize: "1.1rem", fontWeight: "bold"
+    },
+    cardText: {
+        margin: 0, fontSize: "0.9rem", color: "#7f8c8d"
     },
     logoutBtn: {
         padding: "8px 20px", borderRadius: "8px", border: "none",

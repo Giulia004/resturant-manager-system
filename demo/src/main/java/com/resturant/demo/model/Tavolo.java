@@ -13,12 +13,15 @@ public class Tavolo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique=true,nullable = false)
+    @Column(unique = true, nullable = false)
     private int numero;
 
     @Column(nullable = false)
     private int posti;
 
-    @Column(nullable =false)
-    public String status;
+    @Column(nullable = false)
+    private String status;
+
+    @Column(name = "user_id")
+    private Long utenteId;
 }
