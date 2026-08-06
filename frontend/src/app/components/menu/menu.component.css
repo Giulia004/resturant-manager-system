@@ -1,0 +1,68 @@
+.transition-all {
+    transition: all 0.25s ease-in-out;
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.4s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.piatto-card {
+    background-color: #f8f9fa;
+    border: 1px solid rgba(0, 0, 0, 0.04) !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.piatto-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, 0.08) !important;
+    background-color: #ffffff;
+}
+
+.btn-custom-warning {
+    background-color: #d97706;
+    transition: background-color 0.2s ease;
+}
+
+.btn-custom-warning:hover {
+    background-color: #b45309;
+}
+
+.delete-btn {
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.delete-btn:hover {
+    background-color: #dc3545 !important;
+    color: white !important;
+}
+
+.add-order-btn {
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.add-order-btn:hover {
+    background-color: #b45309 !important;
+    transform: scale(1.05);
+}

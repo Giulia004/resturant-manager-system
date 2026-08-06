@@ -2,6 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { UserService } from '../../services/user.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -14,12 +15,20 @@ export class Dashboard implements OnInit {
   username: string = '';
 
   public authService = inject(AuthService);
+  public userService = inject(UserService);
+  public effectiveName: string | undefined;
 
   constructor(private router: Router) { }
 
   ngOnInit(): void {
-    this.userRole = localStorage.getItem('role') || 'ADMIN';
-    this.username = localStorage.getItem('username') || 'Utente';
+    if (!this.authService.isLoggedIn) {
+      this.router.navigate(['/login']);
+      return;
+    }
+    this.userRole = this.authService.getRole() || '';
+    this.username = this.authService.getUsername() || '';
+
+    this.effectiveName = this.username.split('.').map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(' ');
   }
 
   logout(): void {

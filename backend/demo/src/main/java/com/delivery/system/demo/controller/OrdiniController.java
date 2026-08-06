@@ -2,6 +2,7 @@ package com.delivery.system.demo.controller;
 
 import java.util.List;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,6 +16,7 @@ import com.delivery.system.demo.model.Ordini;
 @CrossOrigin(origins = "http://localhost:4200")
 @RestController
 @RequestMapping("/api/ordini")
+@PreAuthorize("hasRole('ADMIN','CAMERIERE','CUOCO')")
 public class OrdiniController {
     private final OrdineRepository repository;
 

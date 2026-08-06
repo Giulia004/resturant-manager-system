@@ -37,15 +37,8 @@ export class LoginComponent {
       {
         username: ['', [Validators.required, Validators.minLength(3)]],
         password: ['', [Validators.required, Validators.minLength(6)]],
-      },
-      { validators: this.passwordMatchValidator }
+      }
     );
-  }
-
-  passwordMatchValidator(group: AbstractControl): ValidationErrors | null {
-    const password = group.get('password')?.value;
-    const conferma = group.get('confermaPassword')?.value;
-    return password === conferma ? null : { passwordMismatch: true };
   }
 
   onSubmit(): void {

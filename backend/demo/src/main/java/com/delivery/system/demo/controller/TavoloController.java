@@ -4,6 +4,7 @@ import com.delivery.system.demo.model.Tavolo;
 import com.delivery.system.demo.repository.TavoloRepository;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.List;
 @CrossOrigin(origins = "http://localhost:4200")
 @RestController
 @RequestMapping("/api/tavoli")
+@PreAuthorize("hasAnyRole('ADMIN','CAMERIERE','CASSIERE')")
 public class TavoloController {
     private final TavoloRepository repository;
 
@@ -50,6 +52,7 @@ public class TavoloController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         if (!repository.existsById(id))
             return ResponseEntity.notFound().build();

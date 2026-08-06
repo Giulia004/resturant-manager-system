@@ -1,0 +1,160 @@
+<div class="container py-5">
+
+    <!-- Intestazione della Pagina -->
+    <div class="row mb-4 align-items-center animate-fade-in">
+        <div class="col">
+            <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="icon-box text-white rounded-4 d-flex align-items-center justify-content-center shadow-sm"
+                        style="width: 50px; height: 50px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                        <i class="fa-solid fa-utensils fs-5"></i>
+                    </div>
+                    <div>
+                        <h1 class="fw-bold mb-1 text-dark">Gestione Menu</h1>
+                        <p class="text-muted small mb-0">Esplora le categorie e seleziona i piatti per l'ordine.</p>
+                    </div>
+                </div>
+
+                <!-- Badge Riepilogo Ordine -->
+                @if (ordineCorrente().length > 0) {
+                <div class="badge bg-warning text-dark px-3 py-2 rounded-pill shadow-sm fs-6">
+                    <i class="fa-solid fa-receipt me-1"></i> Ordine: {{ ordineCorrente().length }} piatti
+                </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Form di Inserimento Nuovo Piatto (Visibile solo se Admin) -->
+    @if (isAdmin) {
+    <div class="card border-0 shadow-sm p-4 rounded-4 mb-4 animate-fade-in bg-white">
+        <h5 class="fw-bold text-secondary mb-3 fs-6">
+            <i class="fa-solid fa-plus-circle me-1 text-warning"></i> Aggiungi Nuovo Piatto
+        </h5>
+
+        <form [formGroup]="form" (ngSubmit)="creaPiatto()" class="row g-3 align-items-end">
+            <div class="col-12 col-md-5">
+                <label class="form-label fw-semibold small text-secondary">Nome Piatto</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white text-muted border-end-0 ps-3 pe-2">
+                        <i class="fa-solid fa-burger"></i>
+                    </span>
+                    <input type="text" formControlName="nome" class="form-control border-start-0 ps-2" placeholder="Es. Carbonara">
+                </div>
+            </div>
+
+            <div class="col-12 col-md-3">
+                <label class="form-label fw-semibold small text-secondary">Categoria</label>
+                <select formControlName="categoria" class="form-select">
+                    <option value="Antipasti">Antipasti</option>
+                    <option value="Primi">Primi</option>
+                    <option value="Secondi">Secondi</option>
+                    <option value="Pizze">Pizze</option>
+                    <option value="Bevande">Bevande</option>
+                </select>
+            </div>
+
+            <div class="col-12 col-md-2">
+                <label class="form-label fw-semibold small text-secondary">Prezzo (€)</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white text-muted border-end-0 ps-3 pe-2">
+                        <i class="fa-solid fa-euro-sign"></i>
+                    </span>
+                    <input type="number" step="0.10" formControlName="prezzo" class="form-control border-start-0 ps-2" placeholder="0.00">
+                </div>
+            </div>
+
+            <div class="col-12 col-md-2">
+                <button type="submit" class="btn text-white w-100 py-2 rounded-pill fw-bold border-0 shadow-sm btn-custom-warning">
+                    <i class="fa-solid fa-plus me-1"></i> Aggiungi
+                </button>
+            </div>
+        </form>
+    </div>
+    }
+
+    <!-- Layout Principale: Sidebar Categorie (Sinistra) + Lista Piatti (Destra) -->
+    <div class="row g-4">
+        
+        <!-- SIDEBAR CATEGORIE -->
+        <div class="col-12 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white sticky-top" style="top: 20px;">
+                <h6 class="fw-bold text-secondary mb-3 px-2">
+                    <i class="fa-solid fa-filter me-1 text-warning"></i> Categorie
+                </h6>
+                <div class="list-group list-group-flush gap-1">
+                    @for (cat of categorieDisponibili; track cat) {
+                    <button type="button" 
+                        class="list-group-item list-group-item-action rounded-pill px-3 py-2 border-0 fw-semibold category-btn d-flex justify-content-between align-items-center"
+                        [class.active-category]="categoriaSelezionata() === cat"
+                        (click)="selezionaCategoria(cat)">
+                        <span>{{ cat }}</span>
+                        <i class="fa-solid fa-chevron-right small opacity-50"></i>
+                    </button>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- GRIGLIA DEI PIATTI -->
+        <div class="col-12 col-lg-9">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white p-4">
+                <div class="card-body p-0">
+
+                    @if (loading()) {
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-warning mb-2" role="status"></div>
+                        <p class="text-muted small mb-0">Caricamento menu in corso...</p>
+                    </div>
+                    } @else if (menuFiltrato().length === 0) {
+                    <div class="text-center py-5">
+                        <i class="fa-solid fa-utensils display-4 text-muted opacity-25 mb-3"></i>
+                        <p class="text-muted mb-0">Nessun piatto trovato in questa categoria.</p>
+                    </div>
+                    } @else {
+                    <div class="row g-4">
+                        @for (piatto of menuFiltrato(); track piatto.id) {
+                        <div class="col-12 col-md-6">
+                            <div class="card piatto-card h-100 border-0 shadow-sm rounded-4 p-3 position-relative bg-light-subtle d-flex flex-column">
+                                
+                                <!-- Header Card: Categoria, + Ordine & Elimina -->
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <span class="badge bg-white text-dark border px-3 py-2 rounded-pill fw-bold shadow-sm">
+                                        <i class="fa-solid fa-tag text-warning me-1"></i> {{ piatto.categoria }}
+                                    </span>
+
+                                    <div class="d-flex align-items-center gap-2">
+                                        <!-- Pulsante + per aggiungere all'ordine -->
+                                        <button class="btn btn-sm btn-warning text-white rounded-circle p-2 shadow-sm add-order-btn"
+                                            (click)="addItem(piatto)" title="Aggiungi al riepilogo ordine">
+                                            <i class="fa-solid fa-plus"></i>
+                                        </button>
+
+                                        @if (isAdmin) {
+                                        <button class="btn btn-sm btn-light text-danger rounded-circle p-2 shadow-sm delete-btn"
+                                            (click)="eliminaPiatto(piatto.id!)" title="Elimina piatto">
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </button>
+                                        }
+                                    </div>
+                                </div>
+
+                                <!-- Nome e Prezzo del Piatto -->
+                                <div class="d-flex justify-content-between align-items-center mt-auto pt-2">
+                                    <h5 class="fw-bold text-dark mb-0">{{ piatto.nome }}</h5>
+                                    <span class="text-success fw-bold fs-5">€ {{ piatto.prezzo | number:'1.2-2' }}</span>
+                                </div>
+
+                            </div>
+                        </div>
+                        }
+                    </div>
+                    }
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>

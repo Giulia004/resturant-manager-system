@@ -1,0 +1,114 @@
+<div class="container py-5">
+    
+    <div class="row mb-4 align-items-center animate-fade-in">
+        <div class="col">
+            <div class="d-flex align-items-center gap-3">
+                <div class="icon-box text-white rounded-4 d-flex align-items-center justify-content-center shadow-sm"
+                    style="width: 50px; height: 50px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                    <i class="fa-solid fa-chair fs-5"></i>
+                </div>
+                <div>
+                    <h1 class="fw-bold mb-1 text-dark">Gestione Tavoli</h1>
+                    <p class="text-muted small mb-0">Aggiungi, monitora e gestisci lo stato dei tavoli in sala.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm p-4 rounded-4 mb-4 animate-fade-in bg-white">
+        <h5 class="fw-bold text-secondary mb-3 fs-6">
+            <i class="fa-solid fa-plus-circle me-1 text-warning"></i> Aggiungi Nuovo Tavolo
+        </h5>
+
+        <form [formGroup]="form" (ngSubmit)="creaTavolo()" class="row g-3 align-items-end">
+
+            <div class="col-12 col-md-4">
+                <label class="form-label fw-semibold small text-secondary">Numero tavolo</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white text-muted border-end-0 ps-3 pe-2">
+                        <i class="fa-solid fa-hashtag"></i>
+                    </span>
+                    <input type="number" formControlName="numero" class="form-control border-start-0 ps-2"
+                        placeholder="Es. 1">
+                </div>
+            </div>
+
+            <div class="col-12 col-md-4">
+                <label class="form-label fw-semibold small text-secondary">Posti a sedere</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white text-muted border-end-0 ps-3 pe-2">
+                        <i class="fa-solid fa-users"></i>
+                    </span>
+                    <input type="number" formControlName="posti" class="form-control border-start-0 ps-2"
+                        placeholder="Es. 4">
+                </div>
+            </div>
+
+            <div class="col-12 col-md-4">
+                <button type="submit" class="btn text-white w-100 py-2 rounded-pill fw-bold border-0 shadow-sm btn-custom-warning">
+                    <i class="fa-solid fa-plus me-1"></i> Aggiungi tavolo
+                </button>
+            </div>
+
+        </form>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden animate-fade-in bg-white p-4">
+        <div class="card-body p-0">
+
+            @if (loading()) {
+            <div class="text-center py-5">
+                <div class="spinner-border text-warning mb-2" role="status"></div>
+                <p class="text-muted small mb-0">Caricamento tavoli in corso...</p>
+            </div>
+            } @else if (tavoli().length === 0) {
+            <div class="text-center py-5">
+                <i class="fa-solid fa-chair display-4 text-muted opacity-25 mb-3"></i>
+                <p class="text-muted mb-0">Nessun tavolo trovato nel sistema.</p>
+            </div>
+            } @else {
+            <div class="row g-4">
+                @for (tavolo of tavoli(); track tavolo.id) {
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="card tavolo-card h-100 border-0 shadow-sm rounded-4 p-3 position-relative bg-light-subtle">
+                        
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="badge bg-white text-dark border px-3 py-2 rounded-pill fw-bold shadow-sm">
+                                <i class="fa-solid fa-hashtag text-warning me-1"></i> Tavolo {{ tavolo.numero }}
+                            </span>
+
+                            @if (isAdmin) {
+                            <button class="btn btn-sm btn-light text-danger rounded-circle p-2 shadow-sm delete-btn"
+                                (click)="eliminaTavolo(tavolo.id!)" title="Elimina tavolo">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                            }
+                        </div>
+
+                        <div class="mb-3 text-secondary ps-1">
+                            <i class="fa-solid fa-user-group me-2 text-muted"></i> 
+                            <span><strong>{{ tavolo.posti }}</strong> coperti</span>
+                        </div>
+
+                        <div class="mt-auto pt-3 border-top d-flex align-items-center justify-content-between">
+                            <small class="text-muted fw-semibold">Stato:</small>
+                            <button class="btn btn-sm rounded-pill px-3 fw-semibold shadow-sm transition-all"
+                                [class.btn-success]="tavolo.disponibile"
+                                [class.btn-outline-secondary]="!tavolo.disponibile"
+                                (click)="toggleDisponibilita(tavolo)">
+                                <i class="fa-solid me-1" [class.fa-check-circle]="tavolo.disponibile"
+                                    [class.fa-clock]="!tavolo.disponibile"></i>
+                                {{ tavolo.disponibile ? 'Libero' : 'Occupato' }}
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+                }
+            </div>
+            }
+
+        </div>
+    </div>
+
+</div>
