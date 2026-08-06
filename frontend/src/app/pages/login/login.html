@@ -1,0 +1,76 @@
+<div class="login-wrapper d-flex align-items-center justify-content-center min-vh-100 py-5">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-8 col-lg-5">
+
+        <div class="card login-card border-0 shadow-lg p-4 p-md-5 rounded-4 animate-fade-in">
+          
+          <!-- Header della Card con Logo -->
+          <div class="text-center mb-4">
+            <div class="brand-logo-container text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center shadow-sm"
+                 style="width: 65px; height: 65px; background-color: #d97706;">
+              <i class="fa-solid fa-utensils fs-3"></i>
+            </div>
+            <h2 class="fw-bold mb-1" style="color: #b45309;">Bentornato</h2>
+            <p class="text-muted small">Accedi al gestionale del ristorante</p>
+          </div>
+
+          <!-- Form di Login -->
+          <form [formGroup]="form" (ngSubmit)="onSubmit()" class="d-flex flex-column gap-3">
+
+            <!-- Username -->
+            <div class="form-group">
+              <label for="username" class="form-label fw-semibold small text-secondary">Username</label>
+              <div class="input-group">
+                <span class="input-group-text bg-white text-muted border-end-0 ps-3 pe-2">
+                  <i class="fa-solid fa-user"></i>
+                </span>
+                <input id="username" type="text" formControlName="username" class="form-control border-start-0 ps-2" placeholder="Inserisci username" autocomplete="username">
+              </div>
+              @if (form.get('username')?.hasError('required') && form.get('username')?.touched) {
+                <div class="text-danger small mt-1">Lo username è obbligatorio</div>
+              }
+            </div>
+
+            <!-- Password -->
+            <div class="form-group">
+              <label for="password" class="form-label fw-semibold small text-secondary">Password</label>
+              <div class="input-group">
+                <span class="input-group-text bg-white text-muted border-end-0 ps-3 pe-2">
+                  <i class="fa-solid fa-lock"></i>
+                </span>
+                <input id="password" type="password" formControlName="password" class="form-control border-start-0 ps-2" placeholder="Inserisci password" autocomplete="current-password">
+              </div>
+              @if (form.get('password')?.hasError('required') && form.get('password')?.touched) {
+                <div class="text-danger small mt-1">La password è obbligatoria</div>
+              }
+            </div>
+
+            <!-- Pulsante Invio -->
+            <button type="submit" class="btn text-white py-3 rounded-pill fw-bold mt-3 border-0 shadow-sm" 
+                    style="background-color: #d97706; font-size: 1rem;" 
+                    [disabled]="loading">
+              @if (loading) {
+                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                <span>Accesso in corso...</span>
+              } @else {
+                <a routerLink="/dashboard" class="fw-bold text-decoration-none" style="color: white;">Accedi</a>
+              }
+            </button>
+
+          </form>
+
+          <!-- Link per andare alla registrazione -->
+          <div class="text-center mt-4 pt-3 border-top">
+            <p class="small text-muted mb-0">
+              Non hai un account? 
+              <a routerLink="/register" class="fw-bold text-decoration-none" style="color: #d97706;">Registrati</a>
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
