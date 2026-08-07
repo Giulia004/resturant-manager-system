@@ -24,7 +24,19 @@ export class PiattiService {
         return this.http.get<Piatto[]>(this.API, { headers: this.authService.getHeaders() });
     }
 
-    createPaitto(piatto: Piatto): Observable<Piatto> {
+    getPiattoById(id: number): Observable<Piatto> {
+        return this.http.get<Piatto>(`${this.API}/${id}`, { headers: this.authService.getHeaders() });
+    }
+
+    createPiatto(piatto: Piatto): Observable<Piatto> {
         return this.http.post<Piatto>(this.API, piatto, { headers: this.authService.getHeaders() });
+    }
+
+    updatePiatto(id: number, piatto: Partial<Piatto>): Observable<Piatto> {
+        return this.http.put<Piatto>(`${this.API}/${id}`, piatto, { headers: this.authService.getHeaders() });
+    }
+
+    deletePiatto(id: number): Observable<any>{
+        return this.http.delete(`${this.API}/${id}`, { headers: this.authService.getHeaders() });
     }
 }

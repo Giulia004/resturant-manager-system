@@ -6,6 +6,7 @@ import { LoginComponent } from './pages/login/login';
 import { roleGuard } from './guards/role.guard';
 import { TavoliComponent } from './components/tavoli/tavoli.component';
 import { MenuComponent } from './components/menu/menu.component';
+import { ComandeComponent } from './components/comande/comande.component';
 
 export const routes: Routes = [
     {
@@ -28,6 +29,11 @@ export const routes: Routes = [
     {
         path: 'tavoli',
         component: TavoliComponent,
+        canActivate:[roleGuard]
+    },
+    {
+        path:'ordini',
+        component: ComandeComponent,
         canActivate:[roleGuard]
     },
     {

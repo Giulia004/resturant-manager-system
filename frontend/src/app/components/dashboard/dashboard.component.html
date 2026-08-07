@@ -1,6 +1,5 @@
 <div class="dashboard-wrapper min-vh-100">
   
-  <!-- Navbar Superiore Moderna -->
   <nav class="navbar navbar-expand-lg px-4 py-3 custom-navbar shadow-sm">
     <div class="container-fluid">
       <a class="navbar-brand fw-bold d-flex align-items-center gap-2 text-white" href="#">
@@ -11,13 +10,11 @@
       </a>
       
       <div class="d-flex align-items-center gap-3">
-        <!-- Badge Ruolo con icona dinamica -->
         <span class="badge role-badge px-3 py-2 rounded-pill fw-semibold shadow-sm d-flex align-items-center gap-2">
           <i class="fa-solid fa-shield-halved text-warning"></i>
           <span>{{ userRole || 'UTENTE' }}</span>
         </span>
 
-        <!-- Pulsante Logout -->
         <button (click)="logout()" class="btn btn-outline-light btn-sm px-3 rounded-pill d-flex align-items-center gap-2 logout-btn">
           <i class="fa-solid fa-right-from-bracket"></i> 
           <span class="d-none d-sm-inline">Esci</span>
@@ -26,10 +23,8 @@
     </div>
   </nav>
 
-  <!-- Contenuto Principale -->
   <div class="container py-5">
     
-    <!-- Sezione Benvenuto Raffinata -->
     <div class="row mb-5 animate-fade-in">
       <div class="col-12">
         <div class="card border-0 shadow-sm p-4 p-md-4 rounded-4 welcome-card position-relative overflow-hidden">
@@ -45,7 +40,6 @@
       </div>
     </div>
 
-    <!-- Griglia Azioni Rapide in base al Ruolo -->
     <div class="row g-4 animate-fade-in">
 
       <!-- GESTIONE TAVOLI -->
@@ -102,24 +96,8 @@
         </div>
       }
 
-      <!-- GESTIONE MENU (ADMIN) -->
+      <!-- GESTIONE PERSONALE (ADMIN) -->
       @if (userRole === 'ADMIN') {
-        <div class="col-12 col-md-6 col-lg-4">
-          <div class="card h-100 border-0 shadow-sm p-4 rounded-4 action-card text-decoration-none" routerLink="/menu">
-            <div class="card-body p-0">
-              <div class="d-flex align-items-center justify-content-between mb-3">
-                <div class="icon-box text-white rounded-4 d-flex align-items-center justify-content-center shadow-sm" style="width: 55px; height: 55px; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);">
-                  <i class="fa-solid fa-book-open fs-4"></i>
-                </div>
-                <span class="badge bg-light text-muted fw-normal px-2 py-1 rounded-pill small">Catalogo</span>
-              </div>
-              <h4 class="fw-bold text-dark mb-2">Gestione Menu</h4>
-              <p class="text-muted small mb-0 lh-base">Aggiungi, modifica o rimuovi piatti, pizze e bevande dal listino prezzi.</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- GESTIONE PERSONALE (ADMIN) -->
         <div class="col-12 col-md-6 col-lg-4">
           <div class="card h-100 border-0 shadow-sm p-4 rounded-4 action-card text-decoration-none" routerLink="/utenti">
             <div class="card-body p-0">

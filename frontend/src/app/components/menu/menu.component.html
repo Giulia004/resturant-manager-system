@@ -3,24 +3,41 @@
     <!-- Intestazione della Pagina -->
     <div class="row mb-4 align-items-center animate-fade-in">
         <div class="col">
-            <div class="d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
                 <div class="d-flex align-items-center gap-3">
                     <div class="icon-box text-white rounded-4 d-flex align-items-center justify-content-center shadow-sm"
                         style="width: 50px; height: 50px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
                         <i class="fa-solid fa-utensils fs-5"></i>
                     </div>
                     <div>
-                        <h1 class="fw-bold mb-1 text-dark">Gestione Menu</h1>
+                        <h1 class="fw-bold mb-1 text-dark">
+                            Gestione Menu
+                            @if (numeroTavolo()) {
+                                <span class="badge bg-warning text-dark ms-2 rounded-pill px-3 py-2">
+                                    <i class="fa-solid fa-chair me-1"></i> Tavolo {{ numeroTavolo() }}
+                                </span>
+                            }
+                        </h1>
                         <p class="text-muted small mb-0">Esplora le categorie e seleziona i piatti per l'ordine.</p>
                     </div>
                 </div>
 
-                <!-- Badge Riepilogo Ordine -->
-                @if (ordineCorrente().length > 0) {
-                <div class="badge bg-warning text-dark px-3 py-2 rounded-pill shadow-sm fs-6">
-                    <i class="fa-solid fa-receipt me-1"></i> Ordine: {{ ordineCorrente().length }} piatti
+                <!-- Pulsanti e Riepilogo Ordine -->
+                <div class="d-flex align-items-center gap-2">
+                    <!-- Tasto per aprire il modale di riepilogo -->
+                    <button class="btn btn-sm btn-outline-warning text-dark bg-white shadow-sm fw-semibold px-3 py-2 rounded-pill"
+                            [disabled]="ordineCorrente().length === 0"
+                            (click)="apriRiepilogoOrdine()">
+                        <i class="fa-solid fa-list-check me-1 text-warning"></i> Riepilogo Ordine ({{ ordineCorrente().length }})
+                    </button>
+
+                    <!-- Pulsante Completa Comanda -->
+                    <button class="btn btn-sm btn-success shadow-sm px-3 py-2 rounded-pill fw-semibold" 
+                            [disabled]="ordineCorrente().length === 0" 
+                            (click)="inviaComanda()">
+                        <i class="fa-solid fa-check me-1"></i> Completa Comanda
+                    </button>
                 </div>
-                }
             </div>
         </div>
     </div>
@@ -39,7 +56,8 @@
                     <span class="input-group-text bg-white text-muted border-end-0 ps-3 pe-2">
                         <i class="fa-solid fa-burger"></i>
                     </span>
-                    <input type="text" formControlName="nome" class="form-control border-start-0 ps-2" placeholder="Es. Carbonara">
+                    <input type="text" formControlName="nome" class="form-control border-start-0 ps-2"
+                        placeholder="Es. Carbonara">
                 </div>
             </div>
 
@@ -60,12 +78,14 @@
                     <span class="input-group-text bg-white text-muted border-end-0 ps-3 pe-2">
                         <i class="fa-solid fa-euro-sign"></i>
                     </span>
-                    <input type="number" step="0.10" formControlName="prezzo" class="form-control border-start-0 ps-2" placeholder="0.00">
+                    <input type="number" step="0.10" formControlName="prezzo" class="form-control border-start-0 ps-2"
+                        placeholder="0.00">
                 </div>
             </div>
 
             <div class="col-12 col-md-2">
-                <button type="submit" class="btn text-white w-100 py-2 rounded-pill fw-bold border-0 shadow-sm btn-custom-warning">
+                <button type="submit"
+                    class="btn text-white w-100 py-2 rounded-pill fw-bold border-0 shadow-sm btn-custom-warning">
                     <i class="fa-solid fa-plus me-1"></i> Aggiungi
                 </button>
             </div>
@@ -75,7 +95,7 @@
 
     <!-- Layout Principale: Sidebar Categorie (Sinistra) + Lista Piatti (Destra) -->
     <div class="row g-4">
-        
+
         <!-- SIDEBAR CATEGORIE -->
         <div class="col-12 col-lg-3">
             <div class="card border-0 shadow-sm rounded-4 p-3 bg-white sticky-top" style="top: 20px;">
@@ -84,10 +104,9 @@
                 </h6>
                 <div class="list-group list-group-flush gap-1">
                     @for (cat of categorieDisponibili; track cat) {
-                    <button type="button" 
+                    <button type="button"
                         class="list-group-item list-group-item-action rounded-pill px-3 py-2 border-0 fw-semibold category-btn d-flex justify-content-between align-items-center"
-                        [class.active-category]="categoriaSelezionata() === cat"
-                        (click)="selezionaCategoria(cat)">
+                        [class.active-category]="categoriaSelezionata() === cat" (click)="selezionaCategoria(cat)">
                         <span>{{ cat }}</span>
                         <i class="fa-solid fa-chevron-right small opacity-50"></i>
                     </button>
@@ -115,23 +134,27 @@
                     <div class="row g-4">
                         @for (piatto of menuFiltrato(); track piatto.id) {
                         <div class="col-12 col-md-6">
-                            <div class="card piatto-card h-100 border-0 shadow-sm rounded-4 p-3 position-relative bg-light-subtle d-flex flex-column">
-                                
+                            <div
+                                class="card piatto-card h-100 border-0 shadow-sm rounded-4 p-3 position-relative bg-light-subtle d-flex flex-column">
+
                                 <!-- Header Card: Categoria, + Ordine & Elimina -->
                                 <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <span class="badge bg-white text-dark border px-3 py-2 rounded-pill fw-bold shadow-sm">
+                                    <span
+                                        class="badge bg-white text-dark border px-3 py-2 rounded-pill fw-bold shadow-sm">
                                         <i class="fa-solid fa-tag text-warning me-1"></i> {{ piatto.categoria }}
                                     </span>
 
                                     <div class="d-flex align-items-center gap-2">
                                         <!-- Pulsante + per aggiungere all'ordine -->
-                                        <button class="btn btn-sm btn-warning text-white rounded-circle p-2 shadow-sm add-order-btn"
+                                        <button
+                                            class="btn btn-sm btn-warning text-white rounded-circle p-2 shadow-sm add-order-btn"
                                             (click)="addItem(piatto)" title="Aggiungi al riepilogo ordine">
                                             <i class="fa-solid fa-plus"></i>
                                         </button>
 
                                         @if (isAdmin) {
-                                        <button class="btn btn-sm btn-light text-danger rounded-circle p-2 shadow-sm delete-btn"
+                                        <button
+                                            class="btn btn-sm btn-light text-danger rounded-circle p-2 shadow-sm delete-btn"
                                             (click)="eliminaPiatto(piatto.id!)" title="Elimina piatto">
                                             <i class="fa-solid fa-trash-can"></i>
                                         </button>
@@ -142,7 +165,8 @@
                                 <!-- Nome e Prezzo del Piatto -->
                                 <div class="d-flex justify-content-between align-items-center mt-auto pt-2">
                                     <h5 class="fw-bold text-dark mb-0">{{ piatto.nome }}</h5>
-                                    <span class="text-success fw-bold fs-5">€ {{ piatto.prezzo | number:'1.2-2' }}</span>
+                                    <span class="text-success fw-bold fs-5">€ {{ piatto.prezzo | number:'1.2-2'
+                                        }}</span>
                                 </div>
 
                             </div>
@@ -157,4 +181,53 @@
 
     </div>
 
+</div>
+
+<!-- Modale Riepilogo Ordine -->
+<div class="modal fade" id="riepilogoModal" tabindex="-1" aria-labelledby="riepilogoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow rounded-4">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-dark" id="riepilogoModalLabel">
+                    <i class="fa-solid fa-receipt text-warning me-2"></i> Riepilogo Ordine Corrente
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+            </div>
+            <div class="modal-body py-4">
+                @if (ordineCorrente().length === 0) {
+                    <p class="text-muted text-center mb-0">Nessun piatto aggiunto all'ordine.</p>
+                } @else {
+                    <ul class="list-group list-group-flush mb-3">
+                        @for (piatto of ordineCorrente(); track $index) {
+                            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                <div>
+                                    <span class="fw-semibold text-dark">{{ piatto.nome }}</span>
+                                    <br>
+                                    <small class="text-muted">{{ piatto.categoria }}</small>
+                                </div>
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="text-success fw-bold">€ {{ piatto.prezzo | number:'1.2-2' }}</span>
+                                    <button class="btn btn-sm btn-outline-danger border-0 rounded-circle" (click)="removeItem(piatto)" title="Rimuovi">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </button>
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                    <div class="d-flex justify-content-between align-items-center border-top pt-3 fw-bold fs-5">
+                        <span>Totale:</span>
+                        <span class="text-success">€ {{ calcolaTotaleOrdine() | number:'1.2-2' }}</span>
+                    </div>
+                }
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Chiudi</button>
+                @if (ordineCorrente().length > 0) {
+                    <button type="button" class="btn btn-success rounded-pill px-4 shadow-sm" data-bs-dismiss="modal" (click)="inviaComanda()">
+                        <i class="fa-solid fa-check me-1"></i> Conferma e Invia
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
 </div>
