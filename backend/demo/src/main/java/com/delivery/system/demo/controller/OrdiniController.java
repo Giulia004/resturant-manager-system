@@ -21,8 +21,10 @@ import com.delivery.system.demo.repository.TavoloRepository;
 import com.delivery.system.dto.CambioStatoRequest;
 import com.delivery.system.dto.OrdineItemRequest;
 import com.delivery.system.dto.OrdineRequest;
+import com.delivery.system.dto.PagamentoRequest;
 
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 
 import com.delivery.system.demo.model.OrdineItem;
 import com.delivery.system.demo.model.Ordini;
@@ -65,6 +67,7 @@ public class OrdiniController {
 
         Ordini ordine = new Ordini();
         ordine.setTavolo(tavolo);
+        ordine.setNumeroTavolo(tavolo.getNumero());
         ordine.setDataCreazione(LocalDateTime.now());
         ordine.setStato(StatoOrdine.IN_ATTESA);
 
@@ -105,5 +108,34 @@ public class OrdiniController {
             return ResponseEntity.notFound().build();
         repository.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}/pagamento")
+    @PreAuthorize("hasAnyRole('ADMIN','CASSIERE')")
+    @Transactional
+    public ResponseEntity<Ordini> finalizzaPagamento(@PathVariable Long id,
+            @Valid @RequestBody PagamentoRequest request) {
+        Ordini ordine = repository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ordine non trovato"));
+
+        // Impedisco di pagare un ordine già pagato o annullato
+        if (ordine.getStato() == StatoOrdine.PAGATO)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "L'ordine è già stato pagato");
+
+        if (ordine.getStato() == StatoOrdine.ANNULLATO)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Questo ordine non può essere pagato");
+
+        ordine.setStato(StatoOrdine.PAGATO);
+        ordine.setMetodoPagamento(request.metodoPagamento());
+
+        // Gestione dello sconto
+        if (request.sconto() != null && request.sconto() > 0) {
+            if (request.sconto() >= ordine.getTotale())
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Lo sconto non può essere applicato");
+            ordine.setSconto(request.sconto());
+            ordine.setTotale(ordine.getTotale() - request.sconto());
+        }
+
+        return ResponseEntity.ok(repository.save(ordine));
     }
 }

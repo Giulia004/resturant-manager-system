@@ -66,7 +66,7 @@
                     <i class="fa-solid fa-chair"></i>
                   </div>
                   <div>
-                    <h5 class="fw-bold text-dark mb-0">Tavolo {{ ordine.tavolo.numero }}</h5>
+                    <h5 class="fw-bold text-dark mb-0">Tavolo {{ ordine.tavolo.numero || ordine.numeroTavolo || 'N.D' }}</h5>
                     <span class="text-muted small">
                       <i class="fa-regular fa-clock me-1"></i>{{ ordine.dataCreazione | date:'HH:mm' }}
                     </span>

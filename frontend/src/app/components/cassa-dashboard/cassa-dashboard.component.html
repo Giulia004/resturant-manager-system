@@ -1,0 +1,95 @@
+<div class="container py-5">
+
+  <!-- Header & Indicatori di Cassa -->
+  <div class="row mb-4 align-items-center">
+    <div class="col-12 col-lg-8">
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <span class="badge bg-primary-subtle text-primary px-2 py-1 rounded-pill fw-semibold" style="font-size: 0.7rem;">
+          <i class="fa-solid fa-cash-register me-1"></i> Workstation Cassa
+        </span>
+      </div>
+      <h1 class="fw-bold mb-1 text-dark fs-3">Gestione Pagamenti & Contabilità</h1>
+      <p class="text-muted small mb-0">Monitora gli incassi giornalieri e finalizza i conti dei tavoli.</p>
+    </div>
+
+    <!-- Widget Totale Incassato Oggi -->
+    <div class="col-12 col-lg-4 mt-3 mt-lg-0">
+      <div class="card border-0 shadow-sm rounded-4 p-3 bg-white d-flex flex-row align-items-center justify-content-between">
+        <div>
+          <span class="text-muted small fw-semibold d-block">Incasso Totale Oggi</span>
+          <h2 class="text-success fw-bold mb-0">€ {{ totaleIncassatoOggi | number:'1.2-2' }}</h2>
+        </div>
+        <div class="bg-success-subtle text-success p-3 rounded-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+          <i class="fa-solid fa-wallet fs-4"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sezione Ordini da Saldare -->
+  <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+    <h4 class="fw-bold text-dark mb-3 fs-5">Ordini Attivi in Cassa</h4>
+
+    @if (loading()) {
+      <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="text-muted small mt-2">Caricamento transazioni...</p>
+      </div>
+    } @else if (ordiniDaSaldare.length === 0) {
+      <div class="text-center py-5 text-muted">
+        <i class="fa-solid fa-check-circle display-4 opacity-25 mb-2"></i>
+        <p class="mb-0">Nessun ordine in attesa di pagamento.</p>
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table class="table align-middle table-hover">
+          <thead class="table-light text-uppercase fs-7 text-secondary">
+            <tr>
+              <th>Tavolo</th>
+              <th>Orario</th>
+              <th>Stato</th>
+              <th>Totale</th>
+              <th class="text-end">Azioni</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (ordine of ordiniDaSaldare; track ordine.id) {
+              <tr>
+                <td class="fw-bold text-dark">
+                  Tavolo {{ ordine.numeroTavolo || ordine.tavolo.numero || 'N.D.' }}
+                </td>
+                <td class="text-muted small">
+                  {{ ordine.dataCreazione | date:'HH:mm' }}
+                </td>
+                <td>
+                  <span class="badge rounded-pill px-3 py-2 fw-semibold"
+                        [ngClass]="{
+                          'bg-warning-subtle text-warning': ordine.stato === 'IN_ATTESA',
+                          'bg-info-subtle text-info': ordine.stato === 'IN_PREPARAZIONE',
+                          'bg-primary-subtle text-primary': ordine.stato === 'PRONTO',
+                          'bg-success-subtle text-success': ordine.stato === 'SERVITO'
+                        }">
+                    {{ ordine.stato.replace('_', ' ') }}
+                  </span>
+                </td>
+                <td class="fw-bold text-success">
+                  € {{ ordine.totale | number:'1.2-2' }}
+                </td>
+                <td class="text-end">
+                  <button class="btn btn-success btn-sm rounded-pill px-3 fw-semibold shadow-sm"
+                          (click)="selezionaPerPagamento(ordine)"
+                          data-bs-toggle="modal" data-bs-target="#pagamentoModal">
+                    <i class="fa-solid fa-cash-register me-1"></i> Incassa
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+
+</div>
+
+<!-- Qui collegheremo la modale di pagamento per l'ordine selezionato -->

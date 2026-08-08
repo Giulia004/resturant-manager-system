@@ -28,8 +28,8 @@
     "tslib": "^2.3.0"
   },
   "devDependencies": {
-    "@angular/build": "^21.2.8",
-    "@angular/cli": "^21.2.8",
+    "@angular/build": "^21.2.20",
+    "@angular/cli": "^21.0.4",
     "@angular/compiler-cli": "^21.2.0",
     "@types/bootstrap": "^5.2.11",
     "@types/express": "^5.0.1",

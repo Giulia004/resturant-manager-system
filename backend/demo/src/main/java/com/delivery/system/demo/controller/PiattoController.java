@@ -3,6 +3,8 @@ package com.delivery.system.demo.controller;
 import com.delivery.system.demo.model.Piatto;
 import com.delivery.system.demo.repository.PiattoRepository;
 
+import jakarta.validation.Valid;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -26,7 +28,7 @@ public class PiattoController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public Piatto create(@RequestBody Piatto piatto) {
+    public Piatto create(@Valid @RequestBody Piatto piatto) {
         return repository.save(piatto);
     }
 
@@ -38,7 +40,7 @@ public class PiattoController {
     // Modifica di un piatto
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
-    public ResponseEntity<Piatto> update(@PathVariable Long id, @RequestBody Piatto nuovoPiatto) {
+    public ResponseEntity<Piatto> update(@PathVariable Long id,@Valid @RequestBody Piatto nuovoPiatto) {
         return repository.findById(id).map(piatto -> {
             piatto.setNome(nuovoPiatto.getNome());
             piatto.setPrezzo(nuovoPiatto.getPrezzo());

@@ -17,6 +17,7 @@ export interface OrdineItem {
 export interface Ordine {
     id?: number;
     tavolo: Tavolo;
+    numeroTavolo?: number;
     dataCreazione: Date;
     stato: StatoOrdine;
     totale: number,

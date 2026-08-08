@@ -28,6 +28,7 @@ export class ComandeComponent implements OnInit {
   statiDisponibili: StatoOrdine[] = ['IN_ATTESA', 'IN_PREPARAZIONE', 'PRONTO', 'SERVITO', 'PAGATO', 'ANNULLATO'];
 
   isAuthorize: boolean = false;
+  
   ngOnInit(): void {
     this.loadOrders();
     this.verifyRole();

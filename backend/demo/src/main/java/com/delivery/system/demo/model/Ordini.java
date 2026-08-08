@@ -13,6 +13,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Version;
 import lombok.Data;
 
 @Entity
@@ -22,8 +23,13 @@ public class Ordini {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Version
+    private Long version;
+    
     @ManyToOne
     private Tavolo tavolo;
+
+    private Integer numeroTavolo;
 
     private LocalDateTime dataCreazione;
 
@@ -31,8 +37,11 @@ public class Ordini {
     private StatoOrdine stato;
 
     private Double totale;
+    private Double sconto;
 
     @OneToMany(mappedBy = "ordine", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrdineItem> righe = new ArrayList<>();
+
+    private String metodoPagamento;
 
 }

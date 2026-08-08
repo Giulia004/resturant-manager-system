@@ -18,7 +18,7 @@ import com.delivery.system.demo.repository.OrdineItemRepository;
 @CrossOrigin(origins = "http://localhost:4200")
 @RestController
 @RequestMapping("/api/ordine-items")
-@PreAuthorize("hasRole('ADMIN','CAMERIERE','CUOCO')")
+@PreAuthorize("hasAnyRole('ADMIN','CAMERIERE','CUOCO')")
 public class OrdineItemController {
     private final OrdineItemRepository repository;
 
