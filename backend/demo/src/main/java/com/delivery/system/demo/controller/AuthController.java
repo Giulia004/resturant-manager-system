@@ -73,7 +73,7 @@ public class AuthController {
         }
         Utente utente = new Utente();
         utente.setUsername(request.username());
-        utente.setPassword(passwordEncoder.encode(utente.getPassword()));
+        utente.setPassword(passwordEncoder.encode(request.password()));
 
         return ResponseEntity.ok(utenteRepository.save(utente));
     }

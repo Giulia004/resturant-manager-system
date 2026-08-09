@@ -21,7 +21,7 @@ export class Dashboard implements OnInit {
   constructor(private router: Router) { }
 
   ngOnInit(): void {
-    if (!this.authService.isLoggedIn) {
+    if (!this.authService.isLoggedIn()) {
       this.router.navigate(['/login']);
       return;
     }
@@ -32,8 +32,8 @@ export class Dashboard implements OnInit {
   }
 
   logout(): void {
-    localStorage.clear();
-    this.router.navigate(['/home']);
+    this.authService.logout();
+    this.router.navigate(['/login']);
   }
 
 }

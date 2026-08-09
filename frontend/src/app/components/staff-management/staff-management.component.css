@@ -1,0 +1,141 @@
+/* staff-management.component.css */
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Card form di creazione e tabella staff */
+.card {
+  transition: all 0.2s ease-in-out;
+  border: 1px solid rgba(229, 231, 235, 0.8) !important;
+}
+
+.rounded-4 {
+  border-radius: 1rem !important;
+}
+
+/* Bottone principale (crea utente) */
+.btn-warning {
+  background-color: #d97706;
+  border-color: #d97706;
+  color: #ffffff;
+  font-weight: 600;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.btn-warning:hover {
+  background-color: #b45309;
+  border-color: #b45309;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.btn-warning:disabled {
+  background-color: #fcd34d;
+  border-color: #fcd34d;
+}
+
+/* Tabella staff */
+.table {
+  vertical-align: middle;
+}
+
+.table th {
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #6b7280;
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #edf2f7;
+}
+
+.table td {
+  padding: 0.85rem 0.75rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.table tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+.table tbody tr:hover {
+  background-color: #fffbeb;
+}
+
+/* Select ruolo inline nella tabella */
+.form-select-sm {
+  font-size: 0.8rem;
+  border: 1px solid #e5e7eb;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-select-sm:focus {
+  border-color: #d97706;
+  box-shadow: 0 0 0 0.2rem rgba(217, 119, 6, 0.15);
+}
+
+/* Bottone elimina */
+.btn-outline-danger {
+  border-color: #f3c9c9;
+  color: #dc3545;
+  transition: all 0.2s ease;
+}
+
+.btn-outline-danger:hover {
+  background-color: #dc3545;
+  border-color: #dc3545;
+  color: #ffffff;
+  transform: scale(1.03);
+}
+
+/* Input e select del form di creazione */
+.form-control,
+.form-select {
+  border: 1px solid #e5e7eb;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: #d97706;
+  box-shadow: 0 0 0 0.2rem rgba(217, 119, 6, 0.15);
+}
+
+.form-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.35rem;
+}
+
+/* Badge ruolo (se vuoi mostrarlo anche in sola lettura, coerente con comande.component.css) */
+.ruolo-admin {
+  background-color: #fee2e2 !important;
+  color: #991b1b !important;
+}
+
+.ruolo-cameriere {
+  background-color: #fef3c7 !important;
+  color: #92400e !important;
+}
+
+.ruolo-cuoco {
+  background-color: #dbeafe !important;
+  color: #1e40af !important;
+}
+
+.ruolo-cassiere {
+  background-color: #dcfce7 !important;
+  color: #166534 !important;
+}

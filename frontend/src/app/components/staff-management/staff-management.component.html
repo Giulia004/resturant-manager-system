@@ -1,0 +1,77 @@
+<div class="container py-5 animate-fade-in">
+  <h2 class="fw-bold mb-4">Gestione Personale</h2>
+
+  <!-- Form creazione nuovo membro -->
+  <div class="card border-0 shadow-sm rounded-4 p-4 mb-5">
+    <h5 class="fw-bold mb-3">Aggiungi nuovo membro dello staff</h5>
+    <form [formGroup]="form" (ngSubmit)="creaUtente()" class="row g-3">
+      <div class="col-md-4">
+        <label class="form-label">Username</label>
+        <input type="text" class="form-control" formControlName="username">
+        @if (form.get('username')?.touched && form.get('username')?.invalid) {
+          <small class="text-danger">Username non valido (4-30 caratteri)</small>
+        }
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-control" formControlName="password">
+        @if (form.get('password')?.touched && form.get('password')?.invalid) {
+          <small class="text-danger">Min 8 caratteri, una maiuscola e un numero</small>
+        }
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label">Ruolo</label>
+        <select class="form-select" formControlName="ruolo">
+          <option value="" disabled selected>Seleziona...</option>
+          @for (ruolo of ruoli; track ruolo) {
+            <option [value]="ruolo">{{ ruolo }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="col-md-1 d-flex align-items-end">
+        <button type="submit" class="btn btn-warning w-100">Crea</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Tabella staff esistente -->
+  <div class="card border-0 shadow-sm rounded-4 p-4">
+    <h5 class="fw-bold mb-3">Staff registrato</h5>
+
+    @if (loading()) {
+      <p class="text-muted">Caricamento...</p>
+    } @else {
+      <table class="table align-middle">
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Ruolo</th>
+            <th class="text-end">Azioni</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (utente of utenti(); track utente.id) {
+            <tr>
+              <td>{{ utente.username }}</td>
+              <td>
+                <select class="form-select form-select-sm w-auto"
+                        [ngModel]="utente.ruolo"
+                        (ngModelChange)="cambiaRuolo(utente, $event)">
+                  @for (ruolo of ruoli; track ruolo) {
+                    <option [value]="ruolo">{{ ruolo }}</option>
+                  }
+                </select>
+              </td>
+              <td class="text-end">
+                <button class="btn btn-outline-danger btn-sm" (click)="eliminaUtente(utente)">Elimina</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+</div>

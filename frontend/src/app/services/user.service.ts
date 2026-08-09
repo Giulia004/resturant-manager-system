@@ -10,6 +10,12 @@ export interface User{
     ruolo: Ruolo;
 };
 
+export interface CreateUserRequest{
+    username: string;
+    password: string;
+    ruolo: Ruolo;
+};
+
 @Injectable({
     providedIn:'root'
 })
@@ -27,6 +33,9 @@ export class UserService{
         return this.http.get<User>(`${this.API}/${id}`);
     }
 
+    createUser(data: CreateUserRequest): Observable<User>{
+        return this.http.post<User>(this.API, data);
+    }
     updateUser(id: number, data: Partial<Pick<User,'username'|'ruolo'>>): Observable<User>{
         return this.http.put<User>(`${this.API}/${id}`, data);
     }
