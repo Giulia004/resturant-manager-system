@@ -1,4 +1,4 @@
-package com.delivery.system.dto;
+package com.delivery.system.dto.request;
 
 public record OrdineItemRequest(Long piattoId,Integer qta) {
     

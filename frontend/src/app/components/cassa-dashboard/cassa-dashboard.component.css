@@ -49,3 +49,31 @@
 .rounded-4 {
   border-radius: 1rem !important;
 }
+
+.modal-content .form-control:focus {
+  border-color: #198754;
+  /* Verde Bootstrap per mantenere il tema */
+  box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.15);
+}
+
+/* Stile per i bottoni di selezione pagamento */
+.btn-outline-secondary {
+  border-color: #dee2e6;
+  color: #6c757d;
+}
+
+/* Animazione per le transizioni della modale (Bootstrap lo fa, ma noi lo rendiamo più fluido) */
+.modal.fade .modal-dialog {
+  transition: transform 0.3s ease-out;
+}
+
+/* Miglioriamo la leggibilità della lista piatti nella modale */
+.modal-body ul li:last-child {
+  border-bottom: none !important;
+}
+
+/* Stile per il badge "Workstation Cassa" nell'header */
+.badge.bg-primary-subtle {
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}

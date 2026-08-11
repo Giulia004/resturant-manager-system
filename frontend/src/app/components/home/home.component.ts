@@ -8,17 +8,13 @@ import { Router, RouterLink } from '@angular/router';
   selector: 'app-home',
   standalone: true,
   imports: [MatButtonModule, MatCardModule, MatIconModule, RouterLink],
-  templateUrl: './home.html',
-  styleUrl: './home.css',
+  templateUrl: './home.component.html',
+  styleUrl: './home.component.css',
 })
 export class HomeComponent {
   constructor(private router: Router) { }
 
   login(): void{
     this.router.navigate(['/login']);
-  }
-
-  register(): void{
-    this.router.navigate(['/register']);
   }
 }

@@ -11,6 +11,7 @@
         opacity: 0;
         transform: translateY(8px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -50,4 +51,37 @@
 .delete-btn:hover {
     background-color: #dc3545 !important;
     color: white !important;
+}
+
+/* Effetto bordo laterale dinamico in base allo stato */
+.tavolo-card {
+    background-color: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.05) !important;
+    border-left: 5px solid #ccc !important;
+    transition: all 0.25s ease-in-out;
+}
+
+.tavolo-card.tavolo-libero {
+    border-left-color: #198754 !important;
+    /* Verde bootstrap */
+}
+
+.tavolo-card.tavolo-occupato {
+    border-left-color: #6c757d !important;
+    /* Grigio/Scuro */
+    background-color: #fafbfc;
+}
+
+.tavolo-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 .75rem 1.5rem rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Icona centrale circolare */
+.table-icon-wrapper {
+    transition: transform 0.2s ease;
+}
+
+.tavolo-card:hover .table-icon-wrapper {
+    transform: scale(1.08);
 }

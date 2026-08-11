@@ -32,10 +32,6 @@ export class AuthService {
         this.isBrowser = isPlatformBrowser(platformId);
     }
 
-    register(data: RegisterRequest): Observable<any> {
-        return this.http.post(`${this.API}/register`, data);
-    }
-
     login(username: string, password: string): Observable<LoginResponse> {
         return this.http.post<LoginResponse>(`${this.API}/login`, { username, password })
             .pipe(tap(res => {

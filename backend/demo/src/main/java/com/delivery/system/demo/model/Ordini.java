@@ -13,11 +13,15 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import jakarta.persistence.Version;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
-@Data
+@Table(name = "ordini")
+@Getter
+@Setter
 public class Ordini {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,5 +47,4 @@ public class Ordini {
     private List<OrdineItem> righe = new ArrayList<>();
 
     private String metodoPagamento;
-
 }

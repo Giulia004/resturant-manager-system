@@ -1,11 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import {
-  AbstractControl,
   FormBuilder,
   FormGroup,
   ReactiveFormsModule,
-  ValidationErrors,
   Validators,
 } from '@angular/forms';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
@@ -17,8 +15,7 @@ import { AuthService } from '../../services/auth.service';
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MatSnackBarModule,
-    RouterLink,
+    MatSnackBarModule
   ],
   templateUrl: './login.html',
   styleUrl: './login.css',

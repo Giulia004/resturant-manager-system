@@ -24,7 +24,7 @@
         </div>
 
         <div class="d-flex align-items-center gap-2">
-          <button class="btn btn-success shadow-sm px-4 py-2 rounded-pill fw-semibold d-inline-flex align-items-center gap-2 transition-all"
+          <button class="btn btn-success shadow-sm px-4 py-2 rounded-pill fw-semibold d-inline-flex align-items-center gap-2"
                   data-bs-toggle="modal" data-bs-target="#nuovaComandaModal"
                   (click)="apriNuovaComanda()">
             <span class="bg-white bg-opacity-25 rounded-circle p-1 d-inline-flex align-items-center justify-content-center" style="width: 22px; height: 22px;">
@@ -38,6 +38,56 @@
     </div>
   </div>
 
+  <div class="row mb-4 align-items-center g-3">
+    <div class="col-12 col-lg-8">
+      <div class="d-flex flex-wrap gap-2">
+        <button class="btn btn-sm rounded-pill px-3 fw-semibold shadow-sm"
+                [class.btn-dark]="filtroStato() === 'TUTTI'"
+                [class.btn-light]="filtroStato() !== 'TUTTI'"
+                (click)="setFiltro('TUTTI')">
+          Tutti
+        </button>
+        <button class="btn btn-sm rounded-pill px-3 fw-semibold shadow-sm"
+                [class.btn-dark]="filtroStato() === 'IN_ATTESA'"
+                [class.btn-light]="filtroStato() !== 'IN_ATTESA'"
+                (click)="setFiltro('IN_ATTESA')">
+          In Attesa
+        </button>
+        <button class="btn btn-sm rounded-pill px-3 fw-semibold shadow-sm"
+                [class.btn-dark]="filtroStato() === 'IN_PREPARAZIONE'"
+                [class.btn-light]="filtroStato() !== 'IN_PREPARAZIONE'"
+                (click)="setFiltro('IN_PREPARAZIONE')">
+          In Preparazione
+        </button>
+        <button class="btn btn-sm rounded-pill px-3 fw-semibold shadow-sm"
+                [class.btn-dark]="filtroStato() === 'PRONTO'"
+                [class.btn-light]="filtroStato() !== 'PRONTO'"
+                (click)="setFiltro('PRONTO')">
+          Pronti
+        </button>
+        <button class="btn btn-sm rounded-pill px-3 fw-semibold shadow-sm"
+                [class.btn-dark]="filtroStato() === 'SERVITO'"
+                [class.btn-light]="filtroStato() !== 'SERVITO'"
+                (click)="setFiltro('SERVITO')">
+          Serviti
+        </button>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-4">
+      <div class="input-group shadow-sm rounded-pill overflow-hidden bg-white">
+        <span class="input-group-text bg-white border-0 ps-3 text-muted">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </span>
+        <input type="text" 
+               class="form-control border-0 shadow-none ps-2" 
+               placeholder="Cerca per numero tavolo..."
+               [ngModel]="ricercaTavolo()"
+               (ngModelChange)="ricercaTavolo.set($event)">
+      </div>
+    </div>
+  </div>
+
   @if (loading()) {
     <div class="text-center py-5">
       <div class="spinner-border text-warning mb-2" role="status">
@@ -45,19 +95,20 @@
       </div>
       <p class="text-muted small mb-0">Caricamento comande in corso...</p>
     </div>
-  } @else if (orders().length === 0) {
-    <div class="text-center py-5">
+  } @else if (filteredOrders().length === 0) {
+    <div class="text-center py-5 bg-white rounded-4 shadow-sm border border-light">
       <div class="mb-3">
         <i class="fa-solid fa-receipt display-4 text-muted opacity-25"></i>
       </div>
-      <h5 class="text-dark fw-semibold">Nessuna comanda attiva</h5>
-      <p class="text-muted small mb-0">Crea una nuova comanda per iniziare a gestire gli ordini.</p>
+      <h5 class="text-dark fw-semibold">Nessuna comanda trovata</h5>
+      <p class="text-muted small mb-0">Nessun ordine corrisponde ai filtri selezionati.</p>
     </div>
   } @else {
     <div class="row g-4 animate-fade-in">
-      @for (ordine of orders(); track ordine.id) {
+      @for (ordine of filteredOrders(); track ordine.id) {
         <div class="col-12 col-md-6 col-lg-4">
-          <div class="card comanda-card h-100 border-0 shadow-sm rounded-4 p-3">
+          <div class="card comanda-card h-100 border-0 shadow-sm rounded-4 p-3 d-flex flex-column">
+            
             <div class="card-body p-0 d-flex flex-column">
 
               <div class="d-flex align-items-center justify-content-between mb-3">
@@ -66,7 +117,7 @@
                     <i class="fa-solid fa-chair"></i>
                   </div>
                   <div>
-                    <h5 class="fw-bold text-dark mb-0">Tavolo {{ ordine.tavolo.numero || ordine.numeroTavolo || 'N.D' }}</h5>
+                    <h5 class="fw-bold text-dark mb-0">Tavolo {{ ordine.tavolo?.numero || ordine.numeroTavolo || 'N.D' }}</h5>
                     <span class="text-muted small">
                       <i class="fa-regular fa-clock me-1"></i>{{ ordine.dataCreazione | date:'HH:mm' }}
                     </span>
@@ -107,16 +158,31 @@
                   <li class="comanda-riga d-flex justify-content-between align-items-center py-2">
                     <span class="text-dark pe-2">
                       <span class="badge bg-light text-dark border me-1 fw-bold">{{ riga.qta }}x</span> 
-                      {{ riga.piatto.nome }}
+                      {{ riga.nomePiatto }}
                     </span>
                     <span class="text-muted text-nowrap fw-medium">€ {{ riga.prezzoUnitario * riga.qta | number:'1.2-2' }}</span>
                   </li>
                 }
               </ul>
 
-              <div class="comanda-totale d-flex justify-content-between align-items-center pt-3 mt-auto">
-                <span class="text-secondary fw-semibold small">Totale Comanda</span>
-                <span class="text-success fs-5 fw-bold">€ {{ ordine.totale | number:'1.2-2' }}</span>
+              <div class="mt-auto">
+                <div class="comanda-totale d-flex justify-content-between align-items-center pt-3 mb-3">
+                  <span class="text-secondary fw-semibold small">Totale Comanda</span>
+                  <span class="text-success fs-5 fw-bold">€ {{ ordine.totale | number:'1.2-2' }}</span>
+                </div>
+
+                @if (ordine.stato === 'IN_ATTESA' || ordine.stato === 'IN_PREPARAZIONE' || ordine.stato === 'PRONTO') {
+                  <button class="btn btn-dark w-100 rounded-pill fw-semibold py-2 shadow-sm d-flex align-items-center justify-content-center gap-2 transition-all"
+                          (click)="avanzaStato(ordine)">
+                    @if (ordine.stato === 'IN_ATTESA') {
+                      <span>👨‍🍳 Inizia Preparazione</span>
+                    } @else if (ordine.stato === 'IN_PREPARAZIONE') {
+                      <span>✅ Segna come Pronto</span>
+                    } @else if (ordine.stato === 'PRONTO') {
+                      <span>🍽️ Segna come Servito</span>
+                    }
+                  </button>
+                }
               </div>
 
             </div>

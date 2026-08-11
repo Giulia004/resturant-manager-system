@@ -26,6 +26,34 @@
     </div>
   </div>
 
+  <!-- Sezione Dettaglio Report Giornaliero per Metodo di Pagamento -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+        <h5 class="fw-bold text-dark mb-3 fs-5">Incassi per Metodo di Pagamento</h5>
+        <div class="row g-3">
+          @for (entry of reportGiornaliero().entries(); track entry[0]) {
+            <div class="col-12 col-md-6 col-lg-4">
+              <div class="p-3 border rounded-3 bg-light d-flex justify-content-between align-items-center">
+                <div>
+                  <span class="text-muted small fw-semibold d-block">Metodo</span>
+                  <span class="fw-bold text-dark fs-6">{{ entry[0] }}</span>
+                </div>
+                <span class="badge bg-success-subtle text-success fs-6 px-3 py-2 rounded-pill">
+                  € {{ entry[1] | number:'1.2-2' }}
+                </span>
+              </div>
+            </div>
+          } @empty {
+            <div class="col-12 text-center text-muted py-3 small">
+              Nessun incasso registrato per la giornata odierna.
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Sezione Ordini da Saldare -->
   <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
     <h4 class="fw-bold text-dark mb-3 fs-5">Ordini Attivi in Cassa</h4>
@@ -56,19 +84,13 @@
             @for (ordine of ordiniDaSaldare; track ordine.id) {
               <tr>
                 <td class="fw-bold text-dark">
-                  Tavolo {{ ordine.numeroTavolo || ordine.tavolo.numero || 'N.D.' }}
+                  Tavolo {{ ordine.numeroTavolo || ordine.tavolo?.numero || 'N.D.' }}
                 </td>
                 <td class="text-muted small">
                   {{ ordine.dataCreazione | date:'HH:mm' }}
                 </td>
                 <td>
-                  <span class="badge rounded-pill px-3 py-2 fw-semibold"
-                        [ngClass]="{
-                          'bg-warning-subtle text-warning': ordine.stato === 'IN_ATTESA',
-                          'bg-info-subtle text-info': ordine.stato === 'IN_PREPARAZIONE',
-                          'bg-primary-subtle text-primary': ordine.stato === 'PRONTO',
-                          'bg-success-subtle text-success': ordine.stato === 'SERVITO'
-                        }">
+                  <span class="badge rounded-pill px-3 py-2 fw-semibold bg-success-subtle text-success">
                     {{ ordine.stato.replace('_', ' ') }}
                   </span>
                 </td>
@@ -77,8 +99,7 @@
                 </td>
                 <td class="text-end">
                   <button class="btn btn-success btn-sm rounded-pill px-3 fw-semibold shadow-sm"
-                          (click)="selezionaPerPagamento(ordine)"
-                          data-bs-toggle="modal" data-bs-target="#pagamentoModal">
+                          (click)="selezionaPerPagamento(ordine)">
                     <i class="fa-solid fa-cash-register me-1"></i> Incassa
                   </button>
                 </td>
@@ -92,4 +113,102 @@
 
 </div>
 
-<!-- Qui collegheremo la modale di pagamento per l'ordine selezionato -->
+<!-- Modale Dettaglio Pagamento & Sconto -->
+<div class="modal fade" id="pagamentoModal" tabindex="-1" aria-labelledby="pagamentoModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4 p-3">
+      
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2" id="pagamentoModalLabel">
+          <span class="bg-success-subtle text-success p-2 rounded-3 d-inline-flex">
+            <i class="fa-solid fa-cash-register"></i>
+          </span>
+          Chiusura Conto - Tavolo {{ ordineSelezionato()?.numeroTavolo || ordineSelezionato()?.tavolo?.numero }}
+        </h5>
+        <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+      </div>
+
+      <div class="modal-body py-4">
+        
+        <!-- Riepilogo Piatti -->
+        <div class="bg-light rounded-3 p-3 mb-3">
+          <div class="d-flex justify-content-between text-muted small mb-2 fw-semibold">
+            <span>Dettaglio Ordinazione</span>
+            <span>Subtotale: € {{ ordineSelezionato()?.totale | number:'1.2-2' }}</span>
+          </div>
+          <ul class="list-unstyled mb-0 small">
+            @for (riga of ordineSelezionato()?.righe; track riga.id) {
+              <li class="d-flex justify-content-between py-1 border-bottom border-white">
+                <span>{{ riga.qta }}x {{ riga.nomePiatto }}</span>
+                <span class="fw-medium">€ {{ riga.prezzoUnitario * riga.qta | number:'1.2-2' }}</span>
+              </li>
+            }
+          </ul>
+        </div>
+
+        <!-- Input Sconto -->
+        <div class="mb-3">
+          <label for="scontoInput" class="form-label fw-semibold small text-secondary">Sconto Applicato (€)</label>
+          <input id="scontoInput" type="number" min="0" step="0.50" 
+                 class="form-control rounded-pill py-2 px-3" 
+                 [ngModel]="scontoApplicato()"
+                 (ngModelChange)="scontoApplicato.set($event)">
+        </div>
+
+        <!-- Scelta Metodo di Pagamento -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold small text-secondary">Metodo di Pagamento</label>
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-sm rounded-pill px-3 fw-semibold flex-grow-1"
+                    [class.btn-dark]="metodoPagamento() === 'CONTANTI'"
+                    [class.btn-outline-secondary]="metodoPagamento() !== 'CONTANTI'"
+                    (click)="metodoPagamento.set('CONTANTI')">
+              Contanti
+            </button>
+            <button type="button" class="btn btn-sm rounded-pill px-3 fw-semibold flex-grow-1"
+                    [class.btn-dark]="metodoPagamento() === 'POS'"
+                    [class.btn-outline-secondary]="metodoPagamento() !== 'POS'"
+                    (click)="metodoPagamento.set('POS')">
+              Carta / POS
+            </button>
+          </div>
+        </div>
+
+        <!-- Se Contanti: Importo Ricevuto e Resto -->
+        @if (metodoPagamento() === 'CONTANTI') {
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <label for="ricevutoInput" class="form-label fw-semibold small text-secondary">Ricevuto (€)</label>
+              <input id="ricevutoInput" type="number" min="0" 
+                     class="form-control rounded-pill py-2 px-3" 
+                     [ngModel]="importoRicevuto()"
+                     (ngModelChange)="importoRicevuto.set($event)">
+            </div>
+            <div class="col-6 d-flex flex-column justify-content-end">
+              <div class="bg-success bg-opacity-10 text-success rounded-pill py-2 px-3 text-center fw-bold">
+                Resto: € {{ resto | number:'1.2-2' }}
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- Totale Finale da pagare -->
+        <div class="d-flex justify-content-between align-items-center bg-dark text-white rounded-4 p-3 mt-4">
+          <span class="fw-semibold">Totale da Saldare</span>
+          <span class="fs-4 fw-bold text-success">€ {{ totaleFinale | number:'1.2-2' }}</span>
+        </div>
+
+      </div>
+
+      <div class="modal-footer border-0 pt-0 pb-3 px-3">
+        <button type="button" class="btn btn-light rounded-pill px-4 fw-semibold text-secondary" data-bs-dismiss="modal">Annulla</button>
+        <button type="button" class="btn btn-success rounded-pill px-4 shadow-sm fw-semibold d-inline-flex align-items-center gap-2" 
+                (click)="confermaPagamento()">
+          <i class="fa-solid fa-check"></i>
+          <span>Conferma e Incassa</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>

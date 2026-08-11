@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.delivery.system.demo.model.Utente;
 import com.delivery.system.demo.repository.UtenteRepository;
-import com.delivery.system.dto.CreaUtenteRequest;
-import com.delivery.system.dto.UtenteResponse;
+import com.delivery.system.dto.request.CreaUtenteRequest;
+import com.delivery.system.dto.response.UtenteResponse;
 
 import jakarta.validation.Valid;
 

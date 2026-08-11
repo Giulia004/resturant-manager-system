@@ -1,4 +1,4 @@
-package com.delivery.system.dto;
+package com.delivery.system.dto.request;
 
 import java.util.List;
 

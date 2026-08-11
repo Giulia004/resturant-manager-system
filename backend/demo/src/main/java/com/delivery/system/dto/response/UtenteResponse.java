@@ -1,4 +1,4 @@
-package com.delivery.system.dto;
+package com.delivery.system.dto.response;
 
 import com.delivery.system.demo.model.Ruolo;
 import com.delivery.system.demo.model.Utente;

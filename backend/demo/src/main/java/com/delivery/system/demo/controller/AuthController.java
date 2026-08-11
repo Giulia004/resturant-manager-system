@@ -2,7 +2,6 @@ package com.delivery.system.demo.controller;
 
 import java.util.Map;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -15,9 +14,6 @@ import com.delivery.system.demo.model.Utente;
 import com.delivery.system.demo.repository.UtenteRepository;
 import com.delivery.system.demo.security.JwtUtil;
 import com.delivery.system.demo.security.LoginRateLimiter;
-import com.delivery.system.dto.RegistrazioneRequest;
-
-import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,15 +24,12 @@ public class AuthController {
     private final AuthenticationManager authMnager;
     private final JwtUtil jwtUtil;
     private final UtenteRepository utenteRepository;
-    private final PasswordEncoder passwordEncoder;
     private final LoginRateLimiter rateLimiter;
 
-    public AuthController(AuthenticationManager authManager, JwtUtil jwtUtil, UtenteRepository utenteRepository,
-            PasswordEncoder passwordEncoder, LoginRateLimiter rateLimiter) {
+    public AuthController(AuthenticationManager authManager, JwtUtil jwtUtil, UtenteRepository utenteRepository, LoginRateLimiter rateLimiter) {
         this.authMnager = authManager;
         this.jwtUtil = jwtUtil;
         this.utenteRepository = utenteRepository;
-        this.passwordEncoder = passwordEncoder;
         this.rateLimiter = rateLimiter;
     }
 
@@ -65,17 +58,4 @@ public class AuthController {
 
         return ResponseEntity.ok(Map.of("token", token, "ruolo", utente.getRuolo()));
     }
-
-    @PostMapping("/register")
-    public ResponseEntity<?> register(@Valid @RequestBody RegistrazioneRequest request) {
-        if (utenteRepository.findByUsername(request.username()).isPresent()) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", "Username già registrato"));
-        }
-        Utente utente = new Utente();
-        utente.setUsername(request.username());
-        utente.setPassword(passwordEncoder.encode(request.password()));
-
-        return ResponseEntity.ok(utenteRepository.save(utente));
-    }
-
 }

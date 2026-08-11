@@ -1,6 +1,7 @@
 package com.delivery.system.demo.controller;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -18,10 +19,11 @@ import org.springframework.web.server.ResponseStatusException;
 import com.delivery.system.demo.repository.OrdineRepository;
 import com.delivery.system.demo.repository.PiattoRepository;
 import com.delivery.system.demo.repository.TavoloRepository;
-import com.delivery.system.dto.CambioStatoRequest;
-import com.delivery.system.dto.OrdineItemRequest;
-import com.delivery.system.dto.OrdineRequest;
-import com.delivery.system.dto.PagamentoRequest;
+import com.delivery.system.dto.request.CambioStatoRequest;
+import com.delivery.system.dto.request.OrdineItemRequest;
+import com.delivery.system.dto.request.OrdineRequest;
+import com.delivery.system.dto.response.OrdineItemResponse;
+import com.delivery.system.dto.response.OrdiniResponse;
 
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -51,13 +53,13 @@ public class OrdiniController {
     }
 
     @GetMapping
-    public List<Ordini> getAll() {
-        return repository.findAll();
+    public List<OrdiniResponse> getAll() {
+        return repository.findAll().stream().map(this::toResponse).toList();
     }
 
     @PostMapping
     @Transactional
-    public Ordini create(@RequestBody OrdineRequest request) {
+    public ResponseEntity<Ordini> create(@Valid @RequestBody OrdineRequest request) {
         if (request.righe() == null || request.righe().isEmpty())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "L'ordine deve contenere almeno un piatto.");
 
@@ -70,6 +72,9 @@ public class OrdiniController {
         ordine.setNumeroTavolo(tavolo.getNumero());
         ordine.setDataCreazione(LocalDateTime.now());
         ordine.setStato(StatoOrdine.IN_ATTESA);
+
+        if (ordine.getRighe() == null)
+            ordine.setRighe(new ArrayList<>());
 
         double totale = 0.0;
 
@@ -90,11 +95,13 @@ public class OrdiniController {
 
         ordine.setTotale(totale);
 
-        return repository.save(ordine);
+        Ordini salvaOrdine = repository.save(ordine);
+        return ResponseEntity.status(HttpStatus.CREATED).body(salvaOrdine);
     }
 
     @PutMapping("/{id}/stato")
-    public ResponseEntity<Ordini> cambioStato(@PathVariable Long id, @RequestBody CambioStatoRequest request) {
+    @Transactional
+    public ResponseEntity<Ordini> cambioStato(@PathVariable Long id, @Valid @RequestBody CambioStatoRequest request) {
         return repository.findById(id).map(ordine -> {
             ordine.setStato(request.stato());
             return ResponseEntity.ok(repository.save(ordine));
@@ -103,6 +110,7 @@ public class OrdiniController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN','CUOCO')")
+    @Transactional
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         if (!repository.existsById(id))
             return ResponseEntity.notFound().build();
@@ -110,32 +118,15 @@ public class OrdiniController {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/{id}/pagamento")
-    @PreAuthorize("hasAnyRole('ADMIN','CASSIERE')")
-    @Transactional
-    public ResponseEntity<Ordini> finalizzaPagamento(@PathVariable Long id,
-            @Valid @RequestBody PagamentoRequest request) {
-        Ordini ordine = repository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ordine non trovato"));
+    // Metodo mapper
+    private OrdiniResponse toResponse(Ordini ordine) {
+        List<OrdineItemResponse> righe = ordine.getRighe().stream()
+                .map(item -> OrdineItemResponse.builder().nomePiatto(item.getPiatto().getNome()).qta(item.getQta())
+                        .prezzoUnitario(item.getPrezzoUnitario()).build())
+                .toList();
 
-        // Impedisco di pagare un ordine già pagato o annullato
-        if (ordine.getStato() == StatoOrdine.PAGATO)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "L'ordine è già stato pagato");
-
-        if (ordine.getStato() == StatoOrdine.ANNULLATO)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Questo ordine non può essere pagato");
-
-        ordine.setStato(StatoOrdine.PAGATO);
-        ordine.setMetodoPagamento(request.metodoPagamento());
-
-        // Gestione dello sconto
-        if (request.sconto() != null && request.sconto() > 0) {
-            if (request.sconto() >= ordine.getTotale())
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Lo sconto non può essere applicato");
-            ordine.setSconto(request.sconto());
-            ordine.setTotale(ordine.getTotale() - request.sconto());
-        }
-
-        return ResponseEntity.ok(repository.save(ordine));
+        return OrdiniResponse.builder().id(ordine.getId()).numeroTavolo(ordine.getNumeroTavolo())
+                .dataCreazione(ordine.getDataCreazione()).stato(ordine.getStato()).totale(ordine.getTotale())
+                .sconto(ordine.getSconto()).metodoPagamento(ordine.getMetodoPagamento()).righe(righe).build();
     }
 }

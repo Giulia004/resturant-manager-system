@@ -2,12 +2,17 @@ package com.delivery.system.demo.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.Version;
+import lombok.Getter;
+import lombok.Setter;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
-import lombok.Data;
 
 @Entity
-@Data
+@Table(name = "tavolo")
+@Getter
+@Setter
 public class Tavolo {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
@@ -16,4 +21,7 @@ public class Tavolo {
     private Integer numero;
     private Integer posti;
     private Boolean disponibile = true;
+
+    @Version
+    private Long version;
 }

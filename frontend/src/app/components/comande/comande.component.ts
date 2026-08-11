@@ -1,10 +1,11 @@
-import { Component, inject, OnInit, PLATFORM_ID, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, PLATFORM_ID, signal } from '@angular/core';
 import { Ordine, OrdineService, StatoOrdine } from '../../services/ordine.service';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
+import { stat } from 'fs';
 
 @Component({
   selector: 'app-comande',
@@ -20,6 +21,8 @@ export class ComandeComponent implements OnInit {
   private platformId = inject(PLATFORM_ID);
 
   public orders = signal<Ordine[]>([]);
+  public filtroStato = signal<string>('TUTTI');
+  public ricercaTavolo = signal<string>('');
 
   loading = signal<boolean>(true);
   numeroTavolo: number | null = null;
@@ -28,7 +31,24 @@ export class ComandeComponent implements OnInit {
   statiDisponibili: StatoOrdine[] = ['IN_ATTESA', 'IN_PREPARAZIONE', 'PRONTO', 'SERVITO', 'PAGATO', 'ANNULLATO'];
 
   isAuthorize: boolean = false;
-  
+
+  public filteredOrders = computed(() => {
+    const list = this.orders();
+    const stato = this.filtroStato();
+    const ricerca = this.ricercaTavolo();
+
+    return list.filter(ordine => {
+      //Match per stato
+      const matchStato = stato === 'TUTTI' || ordine.stato === stato;
+
+      //Filtro per numero tavolo
+      const numeroTav = ordine.numeroTavolo ?? ordine.tavolo?.numero;
+      const matchRicerca = !ricerca || (numeroTav && numeroTav.toString().includes(ricerca));
+
+      return matchStato && matchRicerca;
+    });
+  });
+
   ngOnInit(): void {
     this.loadOrders();
     this.verifyRole();
@@ -52,6 +72,16 @@ export class ComandeComponent implements OnInit {
     });
   }
 
+  avanzaStato(ordine: Ordine): void {
+    let prossimoStato: StatoOrdine | null = null;
+    if (ordine.stato === 'IN_ATTESA') prossimoStato = 'IN_PREPARAZIONE';
+    else if (ordine.stato === 'IN_PREPARAZIONE') prossimoStato = 'PRONTO';
+    else if (ordine.stato === 'PRONTO') prossimoStato = 'SERVITO';
+
+    if (prossimoStato) {
+      this.cambiaStato(ordine, prossimoStato);
+    }
+  }
   async apriNuovaComanda(): Promise<void> {
     this.numeroTavolo = null;
     this.tavoloNonValido.set(false);
@@ -93,9 +123,9 @@ export class ComandeComponent implements OnInit {
     }
   }
 
-  cambiaStato(ordine: Ordine, nuovoStato: String): void {
+  cambiaStato(ordine: Ordine, nuovoStato: string): void {
     const stato = nuovoStato as StatoOrdine;
-    if (stato === ordine.stato) return;
+    if (nuovoStato === ordine.stato) return;
 
     this.ordiniService.updateStato(ordine.id!, stato).subscribe({
       next: (update) => {
@@ -124,5 +154,9 @@ export class ComandeComponent implements OnInit {
 
   back(): void {
     this.router.navigate(['/dashboard']);
+  }
+
+  setFiltro(stato: string): void {
+    this.filtroStato.set(stato);
   }
 }

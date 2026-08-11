@@ -1,7 +1,6 @@
 import { Routes } from '@angular/router';
 import { Dashboard } from './components/dashboard/dashboard.component';
-import { RegisterComponent } from './pages/register/register.component';
-import { HomeComponent } from './components/home/home';
+import { HomeComponent } from './components/home/home.component';
 import { LoginComponent } from './pages/login/login';
 import { roleGuard } from './guards/role.guard';
 import { TavoliComponent } from './components/tavoli/tavoli.component';
@@ -14,10 +13,6 @@ export const routes: Routes = [
     {
         path: '',
         component: HomeComponent
-    },
-    {
-        path: 'register',
-        component: RegisterComponent
     },
     {
         path: 'login',
@@ -52,7 +47,7 @@ export const routes: Routes = [
         path: 'gestione-staff',
         component: StaffManagementComponent,
         canActivate: [roleGuard],
-        data:{roles:'ADMIN'}
+        data: { roles: ['ADMIN'] }
     },
     {
         path: '**',

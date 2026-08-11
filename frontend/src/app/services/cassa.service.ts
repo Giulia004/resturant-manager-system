@@ -4,11 +4,6 @@ import { AuthService } from "./auth.service";
 import { Observable } from "rxjs";
 import { Ordine } from "./ordine.service";
 
-export interface PagamentoRequest {
-    metodoPagamento: string;
-    sconto?: number;
-};
-
 @Injectable({ providedIn: 'root' })
 
 export class CassaService{
@@ -22,7 +17,7 @@ export class CassaService{
     }
 
     //Finalizza il pagamento di un ordine
-    finalizzaPagamento(ordineId: number, request: PagamentoRequest): Observable<Ordine>{
-        return this.http.put<Ordine>(`${this.API_ORDINI}/${ordineId}/pagamento`, request, { headers: this.authService.getHeaders() });
+    finalizzaPagamento(ordineId: number, pagamentoData: { metodoPagamento: string, importoScontato: number }): Observable<Ordine>{
+        return this.http.post<Ordine>(`${this.API_ORDINI}/${ordineId}/pagamento`, pagamentoData, { headers: this.authService.getHeaders() });
     }
 }

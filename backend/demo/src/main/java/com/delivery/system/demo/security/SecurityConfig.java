@@ -18,7 +18,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
-@EnableMethodSecurity
+@EnableMethodSecurity //Abilita @PreAuthorize nei controller
 public class SecurityConfig {
     private final JwtAuthFilter jwtAuthFilter;
 

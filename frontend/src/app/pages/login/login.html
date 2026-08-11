@@ -47,26 +47,18 @@
             </div>
 
             <!-- Pulsante Invio -->
-            <button type="submit" class="btn text-white py-3 rounded-pill fw-bold mt-3 border-0 shadow-sm" 
-                    style="background-color: #d97706; font-size: 1rem;" 
+            <button type="submit" class="btn text-white py-3 rounded-pill fw-bold mt-3 border-0 shadow-sm"
+                    style="background-color: #d97706; font-size: 1rem;"
                     [disabled]="loading">
               @if (loading) {
                 <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                 <span>Accesso in corso...</span>
               } @else {
-                <a routerLink="/dashboard" class="fw-bold text-decoration-none" style="color: white;">Accedi</a>
+                <span>Accedi</span>
               }
             </button>
 
           </form>
-
-          <!-- Link per andare alla registrazione -->
-          <div class="text-center mt-4 pt-3 border-top">
-            <p class="small text-muted mb-0">
-              Non hai un account? 
-              <a routerLink="/register" class="fw-bold text-decoration-none" style="color: #d97706;">Registrati</a>
-            </p>
-          </div>
 
         </div>
 

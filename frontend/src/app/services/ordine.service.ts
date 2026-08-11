@@ -1,5 +1,4 @@
 import { inject, Injectable } from "@angular/core";
-import { Piatto } from "./piatti.service";
 import { HttpClient } from "@angular/common/http";
 import { Observable } from "rxjs";
 import { AuthService } from "./auth.service";
@@ -9,7 +8,7 @@ export type StatoOrdine = 'IN_ATTESA' | 'IN_PREPARAZIONE' | 'PRONTO' | 'SERVITO'
 
 export interface OrdineItem {
     id?: number;
-    piatto: Piatto;
+    nomePiatto: string;
     qta: number;
     prezzoUnitario: number;
 };
@@ -18,10 +17,12 @@ export interface Ordine {
     id?: number;
     tavolo: Tavolo;
     numeroTavolo?: number;
-    dataCreazione: Date;
+    dataCreazione: string;
     stato: StatoOrdine;
     totale: number,
-    righe: OrdineItem[]
+    sconto?: number;
+    metodoPagamento?: string;
+    righe: OrdineItem[];
 };
 
 //Riga da inviare
