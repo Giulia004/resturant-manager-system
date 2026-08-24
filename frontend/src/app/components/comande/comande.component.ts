@@ -5,7 +5,6 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
-import { stat } from 'fs';
 
 @Component({
   selector: 'app-comande',
@@ -31,6 +30,8 @@ export class ComandeComponent implements OnInit {
   statiDisponibili: StatoOrdine[] = ['IN_ATTESA', 'IN_PREPARAZIONE', 'PRONTO', 'SERVITO', 'PAGATO', 'ANNULLATO'];
 
   isAuthorize: boolean = false;
+
+  private modalInstance: any = null;
 
   public filteredOrders = computed(() => {
     const list = this.orders();
@@ -82,6 +83,7 @@ export class ComandeComponent implements OnInit {
       this.cambiaStato(ordine, prossimoStato);
     }
   }
+
   async apriNuovaComanda(): Promise<void> {
     this.numeroTavolo = null;
     this.tavoloNonValido.set(false);
@@ -102,16 +104,17 @@ export class ComandeComponent implements OnInit {
       return;
     }
 
-    if (isPlatformBrowser(this.platformId)) {
-      const bootstrap = await import('bootstrap');
-      const modalElement = document.getElementById('nuovaComandaModal');
-      if (modalElement) {
-        const modal = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
-        modal.hide();
-      }
-    }
+    if (this.modalInstance)
+      this.modalInstance.hide();
+    
+    setTimeout(() => {
+      document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+      document.body.classList.remove('modal-open');
+      document.body.style.removeProperty('overflow');
+      document.body.style.removeProperty('padding-right');
 
-    this.router.navigate(['/menu'], { queryParams: { tavolo: this.numeroTavolo } });
+      this.router.navigate(['/menu'], { queryParams: { tavolo: this.numeroTavolo } });
+    }, 150);
   }
 
   async chiudiComanda(): Promise<void> {

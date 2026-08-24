@@ -2,6 +2,10 @@ package com.delivery.system.dto.request;
 
 import com.delivery.system.demo.model.StatoOrdine;
 
-public record CambioStatoRequest(StatoOrdine stato) {
+import jakarta.validation.constraints.NotNull;
+
+public record CambioStatoRequest(
+    @NotNull(message = "Lo stato è obbligatorio")
+    StatoOrdine stato) {
     
 }

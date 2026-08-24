@@ -1,10 +1,11 @@
 package com.delivery.system.demo.controller;
 
 import com.delivery.system.demo.model.Piatto;
-import com.delivery.system.demo.repository.PiattoRepository;
+import com.delivery.system.demo.service.PiattoService;
 
 import jakarta.validation.Valid;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -15,51 +16,40 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/piatti")
 public class PiattoController {
-    private final PiattoRepository repository;
+    private final PiattoService piattoService;
 
-    public PiattoController(PiattoRepository repository) {
-        this.repository = repository;
+    public PiattoController(PiattoService piattoService) {
+        this.piattoService = piattoService;
     }
 
     @GetMapping
     public List<Piatto> getAll() {
-        return repository.findAll();
+        return piattoService.getAllPiatti();
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public Piatto create(@Valid @RequestBody Piatto piatto) {
-        return repository.save(piatto);
+    public ResponseEntity<Piatto> create(@Valid @RequestBody Piatto piatto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(piattoService.create(piatto));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Piatto> getPiattoById(@PathVariable Long id) {
-        return repository.findById(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(piattoService.findPiattoById(id));
     }
 
     // Modifica di un piatto
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
-    public ResponseEntity<Piatto> update(@PathVariable Long id,@Valid @RequestBody Piatto nuovoPiatto) {
-        return repository.findById(id).map(piatto -> {
-            piatto.setNome(nuovoPiatto.getNome());
-            piatto.setPrezzo(nuovoPiatto.getPrezzo());
-            piatto.setDescrizione(nuovoPiatto.getDescrizione());
-            piatto.setDisponibile(nuovoPiatto.getDisponibile());
-            piatto.setCategoria(nuovoPiatto.getCategoria());
-
-            return ResponseEntity.ok(repository.save(piatto));
-        }).orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<Piatto> update(@PathVariable Long id, @Valid @RequestBody Piatto nuovoPiatto) {
+        return ResponseEntity.ok(piattoService.update(id, nuovoPiatto));
     }
 
     // Eliminazione di un piatto tramite l'id
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        if (!repository.existsById(id))
-            return ResponseEntity.notFound().build();
-
-        repository.deleteById(id);
+        piattoService.delete(id);
         return ResponseEntity.noContent().build();
     }
 }

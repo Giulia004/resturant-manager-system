@@ -1,0 +1,57 @@
+services:
+  # 1. DATABASE (MySQL)
+  db_ristorante:
+    image: mysql:8.0
+    container_name: mysql_ristorante
+    environment:
+      # Configura qui le credenziali del tuo database
+      MYSQL_ROOT_PASSWORD: P@zziCraft4000
+      MYSQL_DATABASE: resturant
+      MYSQL_USER: root
+      MYSQL_PASSWORD: P@zziCraft4000
+    ports:
+      - "3307:3306"
+    volumes:
+      # Mantiene i dati persistenti sul tuo PC anche se spegni il container
+      - data_ristorante:/var/lib/mysql
+    networks:
+      - rete_ristorante
+
+  # 2. BACKEND (Spring Boot)
+  backend_ristorante:
+    # Cerca il Dockerfile dentro la cartella "backend" (cambia il nome se la tua cartella si chiama diversamente)
+    build: ./backend/demo 
+    container_name: spring_ristorante
+    ports:
+      - "8080:8080"
+    environment:
+      # Sovrascrive l'URL di Spring Boot per puntare al container MySQL usando il nome del servizio "db_ristorante"
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db_ristorante:3306/gestione_ristorante?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=P@zziCraft4000
+    depends_on:
+      - db_ristorante
+    networks:
+      - rete_ristorante
+
+  # 3. FRONTEND (Angular)
+  frontend_ristorante:
+   image: node:20-alpine
+   container_name: angular_ristorante
+   working_dir: /app
+   ports:
+   - "4200:4200"
+   volumes:
+   - ./frontend:/app
+   - /app/node_modules
+   command: sh -c "npm install && npm start"
+   depends_on:
+   - backend_ristorante
+   networks:
+   - rete_ristorante
+
+volumes:
+  data_ristorante:
+
+networks:
+  rete_ristorante:

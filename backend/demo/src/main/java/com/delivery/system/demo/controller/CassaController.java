@@ -3,7 +3,7 @@ package com.delivery.system.demo.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.delivery.system.demo.model.Ordini;
+import com.delivery.system.demo.model.Ordine;
 import com.delivery.system.demo.model.StatoOrdine;
 import com.delivery.system.demo.repository.OrdineRepository;
 
@@ -27,10 +27,10 @@ public class CassaController {
     //Report Giornaliero
     @GetMapping("/report-giornaliero")
     public Map<String, Double> getReportGiornaliero() {
-        List<Ordini> todayOrders = repository.findOrdiniPagatiOggi(StatoOrdine.PAGATO);
+        List<Ordine> todayOrders = repository.findOrdiniPagatiOggi(StatoOrdine.PAGATO);
 
         return todayOrders.stream().collect(
-                Collectors.groupingBy(o->o.getMetodoPagamento()!=null ? o.getMetodoPagamento(): "N/D", Collectors.summingDouble(Ordini::getTotale)));
+                Collectors.groupingBy(o->o.getMetodoPagamento()!=null ? o.getMetodoPagamento(): "N/D", Collectors.summingDouble(Ordine::getTotale)));
     }
     
 }

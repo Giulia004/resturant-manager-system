@@ -24,7 +24,7 @@ public class Pagamento {
 
     @OneToOne
     @JoinColumn(name = "ordine_id",nullable = false)
-    private Ordini ordine;
+    private Ordine ordine;
 
     private BigDecimal importoTotale;
     private BigDecimal importoScontato;

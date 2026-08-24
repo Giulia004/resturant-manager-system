@@ -1,4 +1,4 @@
-package com.service;
+package com.delivery.system.demo.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -8,7 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.delivery.system.demo.model.MetodoPagamento;
-import com.delivery.system.demo.model.Ordini;
+import com.delivery.system.demo.model.Ordine;
 import com.delivery.system.demo.model.Pagamento;
 import com.delivery.system.demo.model.StatoOrdine;
 import com.delivery.system.demo.repository.OrdineRepository;
@@ -25,8 +25,8 @@ public class PagamentoService {
     private final OrdineRepository ordineRepository;
 
     @Transactional
-    public Ordini processaPagamento(Long ordineId, PagamentoRequest request) {
-        Ordini ordine = ordineRepository.findById(ordineId)
+    public Ordine processaPagamento(Long ordineId, PagamentoRequest request) {
+        Ordine ordine = ordineRepository.findById(ordineId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ordine non trovato"));
 
         if (ordine.getStato() == StatoOrdine.PAGATO)

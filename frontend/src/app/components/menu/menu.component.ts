@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, PLATFORM_ID, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, PLATFORM_ID, signal, AfterViewInit } from '@angular/core';
 import { PiattiService, Piatto } from '../../services/piatti.service';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -9,12 +9,12 @@ import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-menu',
+  standalone: true,
   imports: [CommonModule, ReactiveFormsModule, MatSnackBarModule],
   templateUrl: './menu.component.html',
   styleUrl: './menu.component.css',
 })
-
-export class MenuComponent implements OnInit {
+export class MenuComponent implements OnInit{
   private menuService = inject(PiattiService);
   private ordineService = inject(OrdineService);
   private snackBar = inject(MatSnackBar);
@@ -29,9 +29,7 @@ export class MenuComponent implements OnInit {
   loading = signal<boolean>(true);
 
   isAdmin: boolean = false;
-
   numeroTavolo = signal<number | null>(null);
-
   ordineCorrente = signal<Piatto[]>([]);
 
   categorieDisponibili: string[] = ['Tutti', 'Antipasti', 'Primi', 'Secondi', 'Pizze', 'Bevande'];
@@ -86,17 +84,13 @@ export class MenuComponent implements OnInit {
         this.loading.set(false);
       }, error: (err) => {
         this.loading.set(false);
-        console.log(err)
+        console.error(err);
       }
     });
   }
 
-  creaPiatto() {
-    if (!this.isAdmin) {
-      console.warn('Accesso negato: solo gli amministratori possono creare nuovi piatti.');
-      return;
-    }
-
+  creaPiatto(): void {
+    if (!this.isAdmin) return;
     if (this.form.invalid) return;
 
     const formValue = this.form.value;
@@ -108,9 +102,12 @@ export class MenuComponent implements OnInit {
     this.menuService.createPiatto(newPiatto).subscribe({
       next: () => {
         this.loadMenu();
-        //this.piatti.update(list => [...list, { ...newPiatto, id: Date.now() }]);
         this.form.reset({ categoria: 'Antipasti', disponibile: true });
-      }, error: (err) => console.log(err)
+        this.snackBar.open('Piatto creato con successo!', 'Chiudi', { duration: 2000 });
+      }, error: (err) => {
+        console.error(err);
+        this.snackBar.open('Errore durante la creazione del piatto.', 'Chiudi', { duration: 3000 });
+      }
     });
   }
 
@@ -119,8 +116,8 @@ export class MenuComponent implements OnInit {
 
     this.menuService.deletePiatto(id).subscribe({
       next: () => {
-        this.piatti.update((p) => this.piatti().filter(p => p.id !== id));
-        this.snackBar.open('Tavolo eliminato.', 'Chiudi', { duration: 2000 });
+        this.piatti.update(list => list.filter(p => p.id !== id));
+        this.snackBar.open('Piatto eliminato.', 'Chiudi', { duration: 2000 });
       }, error: (err) => {
         this.snackBar.open('Errore durante l\'eliminazione.', 'Chiudi', { duration: 3000 });
         console.error(err);
@@ -132,8 +129,9 @@ export class MenuComponent implements OnInit {
     this.ordineCorrente.update(list => [...list, piatto]);
   }
 
-  removeItem(piatto: Piatto): void {
-    this.ordineCorrente.update(list => list.filter((_, i) => i !== piatto.id));
+  // Corretto: rimuove l'elemento basandosi sull'indice esatto nell'array del carrello
+  removeItem(index: number): void {
+    this.ordineCorrente.update(list => list.filter((_, i) => i !== index));
   }
 
   calcolaTotaleOrdine(): number {
@@ -144,32 +142,21 @@ export class MenuComponent implements OnInit {
     this.categoriaSelezionata.set(categoria);
   }
 
-  async apriRiepilogoOrdine(): Promise<void> {
-    if (isPlatformBrowser(this.platformId)) {
-      const bootstrap = await import('bootstrap');
-
-      const modalElement = document.getElementById('riepilogoModal');
-      if (modalElement) {
-        const modal = new bootstrap.Modal(modalElement);
-        modal.show();
-      }
-    }
-  }
-
   inviaComanda(): void {
     const elementiCorrenti = this.ordineCorrente();
-
     if (elementiCorrenti.length === 0) return;
 
-    //I duplicati vengono aggregati in un'unica riga con la relativa quantità
+    // I duplicati vengono aggregati in un'unica riga con la relativa quantità
     const righeMap = new Map<number, number>();
     for (const piatto of elementiCorrenti) {
-      righeMap.set(piatto.id!, (righeMap.get(piatto.id!) || 0) + 1);
+      if (piatto.id !== undefined) {
+        righeMap.set(piatto.id, (righeMap.get(piatto.id) || 0) + 1);
+      }
     }
 
     const righe = Array.from(righeMap.entries()).map(([piattoId, qta]) => ({ piattoId, qta }));
-
     const numeroTavolo = this.numeroTavolo();
+
     if (numeroTavolo === null) {
       this.snackBar.open('Numero tavolo non valido.', 'Chiudi', { duration: 3000 });
       return;
@@ -177,7 +164,7 @@ export class MenuComponent implements OnInit {
 
     const nuovoOrdine = {
       numeroTavolo,
-      righe: righe
+      righe
     };
 
     this.ordineService.createOrdine(nuovoOrdine).subscribe({

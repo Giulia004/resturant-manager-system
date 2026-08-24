@@ -2,7 +2,6 @@ package com.delivery.system.demo.controller;
 
 import java.util.List;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,31 +12,31 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.delivery.system.demo.model.OrdineItem;
-import com.delivery.system.demo.repository.OrdineItemRepository;
+import com.delivery.system.demo.service.OrdineItemService;
 
 @CrossOrigin(origins = "http://localhost:4200")
 @RestController
 @RequestMapping("/api/ordine-items")
 @PreAuthorize("hasAnyRole('ADMIN','CAMERIERE','CUOCO')")
 public class OrdineItemController {
-    private final OrdineItemRepository repository;
+    private final OrdineItemService ordineItemService;
 
-    public OrdineItemController(OrdineItemRepository repository) {
-        this.repository = repository;
+    public OrdineItemController(OrdineItemService ordineItemService) {
+        this.ordineItemService = ordineItemService;
     }
 
     @GetMapping
     public List<OrdineItem> getAll() {
-        return repository.findAll();
+        return ordineItemService.findAllItems();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<OrdineItem> getById(@PathVariable Long id) {
-        return repository.findById(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+    public OrdineItem getById(@PathVariable Long id) {
+        return ordineItemService.findById(id);
     }
 
     @PostMapping
     public OrdineItem create(@RequestBody OrdineItem ordineItem) {
-        return repository.save(ordineItem);
+        return ordineItemService.save(ordineItem);
     }
 }

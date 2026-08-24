@@ -21,7 +21,7 @@ public class OrdineItem {
     @ManyToOne
     @JoinColumn(name = "ordine_id")
     @JsonIgnore
-    private Ordini ordine;
+    private Ordine ordine;
     
     @ManyToOne
     private Piatto piatto;

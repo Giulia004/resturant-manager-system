@@ -13,9 +13,9 @@
                         <h1 class="fw-bold mb-1 text-dark">
                             Gestione Menu
                             @if (numeroTavolo()) {
-                                <span class="badge bg-warning text-dark ms-2 rounded-pill px-3 py-2">
-                                    <i class="fa-solid fa-chair me-1"></i> Tavolo {{ numeroTavolo() }}
-                                </span>
+                            <span class="badge bg-warning text-dark ms-2 rounded-pill px-3 py-2">
+                                <i class="fa-solid fa-chair me-1"></i> Tavolo {{ numeroTavolo() }}
+                            </span>
                             }
                         </h1>
                         <p class="text-muted small mb-0">Esplora le categorie e seleziona i piatti per l'ordine.</p>
@@ -24,17 +24,17 @@
 
                 <!-- Pulsanti e Riepilogo Ordine -->
                 <div class="d-flex align-items-center gap-2">
-                    <!-- Tasto per aprire il modale di riepilogo -->
-                    <button class="btn btn-sm btn-outline-warning text-dark bg-white shadow-sm fw-semibold px-3 py-2 rounded-pill"
-                            [disabled]="ordineCorrente().length === 0"
-                            (click)="apriRiepilogoOrdine()">
-                        <i class="fa-solid fa-list-check me-1 text-warning"></i> Riepilogo Ordine ({{ ordineCorrente().length }})
+                    <button
+                        class="btn btn-sm btn-outline-warning text-dark bg-white shadow-sm fw-semibold px-3 py-2 rounded-pill"
+                        [disabled]="ordineCorrente().length === 0" data-bs-toggle="modal"
+                        data-bs-target="#riepilogoModal">
+                        <i class="fa-solid fa-list-check me-1 text-warning"></i> Riepilogo Ordine ({{
+                        ordineCorrente().length }})
                     </button>
 
                     <!-- Pulsante Completa Comanda -->
-                    <button class="btn btn-sm btn-success shadow-sm px-3 py-2 rounded-pill fw-semibold" 
-                            [disabled]="ordineCorrente().length === 0" 
-                            (click)="inviaComanda()">
+                    <button class="btn btn-sm btn-success shadow-sm px-3 py-2 rounded-pill fw-semibold"
+                        [disabled]="ordineCorrente().length === 0" (click)="inviaComanda()">
                         <i class="fa-solid fa-check me-1"></i> Completa Comanda
                     </button>
                 </div>
@@ -195,37 +195,40 @@
             </div>
             <div class="modal-body py-4">
                 @if (ordineCorrente().length === 0) {
-                    <p class="text-muted text-center mb-0">Nessun piatto aggiunto all'ordine.</p>
+                <p class="text-muted text-center mb-0">Nessun piatto aggiunto all'ordine.</p>
                 } @else {
-                    <ul class="list-group list-group-flush mb-3">
-                        @for (piatto of ordineCorrente(); track $index) {
-                            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                                <div>
-                                    <span class="fw-semibold text-dark">{{ piatto.nome }}</span>
-                                    <br>
-                                    <small class="text-muted">{{ piatto.categoria }}</small>
-                                </div>
-                                <div class="d-flex align-items-center gap-3">
-                                    <span class="text-success fw-bold">€ {{ piatto.prezzo | number:'1.2-2' }}</span>
-                                    <button class="btn btn-sm btn-outline-danger border-0 rounded-circle" (click)="removeItem(piatto)" title="Rimuovi">
-                                        <i class="fa-solid fa-trash-can"></i>
-                                    </button>
-                                </div>
-                            </li>
-                        }
-                    </ul>
-                    <div class="d-flex justify-content-between align-items-center border-top pt-3 fw-bold fs-5">
-                        <span>Totale:</span>
-                        <span class="text-success">€ {{ calcolaTotaleOrdine() | number:'1.2-2' }}</span>
-                    </div>
+                <ul class="list-group list-group-flush mb-3">
+                    @for (piatto of ordineCorrente(); track $index) {
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        <div>
+                            <span class="fw-semibold text-dark">{{ piatto.nome }}</span>
+                            <br>
+                            <small class="text-muted">{{ piatto.categoria }}</small>
+                        </div>
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="text-success fw-bold">€ {{ piatto.prezzo | number:'1.2-2' }}</span>
+                            <!-- CORRETTO QUI: Passiamo $index alla funzione removeItem -->
+                            <button class="btn btn-sm btn-outline-danger border-0 rounded-circle"
+                                (click)="removeItem($index)" title="Rimuovi">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </li>
+                    }
+                </ul>
+                <div class="d-flex justify-content-between align-items-center border-top pt-3 fw-bold fs-5">
+                    <span>Totale:</span>
+                    <span class="text-success">€ {{ calcolaTotaleOrdine() | number:'1.2-2' }}</span>
+                </div>
                 }
             </div>
             <div class="modal-footer border-0 pt-0">
                 <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Chiudi</button>
                 @if (ordineCorrente().length > 0) {
-                    <button type="button" class="btn btn-success rounded-pill px-4 shadow-sm" data-bs-dismiss="modal" (click)="inviaComanda()">
-                        <i class="fa-solid fa-check me-1"></i> Conferma e Invia
-                    </button>
+                <button type="button" class="btn btn-success rounded-pill px-4 shadow-sm" data-bs-dismiss="modal"
+                    (click)="inviaComanda()">
+                    <i class="fa-solid fa-check me-1"></i> Conferma e Invia
+                </button>
                 }
             </div>
         </div>

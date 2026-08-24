@@ -1,11 +1,13 @@
 package com.delivery.system.demo;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest
-@Disabled("Disabilitato temporaneamente per problemi di contesto nei test")
+@TestPropertySource(properties = {
+    "jwt.secret=mySecretKeyForTestingPurposesOnlyNeedsToBeLongEnough32Bytes12345678"
+})
 class DemoApplicationTests {
 
 	@Test

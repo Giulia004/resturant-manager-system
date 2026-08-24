@@ -77,3 +77,34 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
+
+/* Transizioni e animazioni fluide */
+.transition-all {
+  transition: all 0.25s ease-in-out;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Card e container personalizzati */
+.card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Regolazioni per i canvas dei grafici */
+canvas {
+  max-width: 100%;
+}

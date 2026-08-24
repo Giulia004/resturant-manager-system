@@ -22,7 +22,7 @@ import lombok.Setter;
 @Table(name = "ordini")
 @Getter
 @Setter
-public class Ordini {
+public class Ordine {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
