@@ -10,11 +10,11 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
-    <groupId>com.gestionale</groupId>
-    <artifactId>app-gestionale</artifactId>
+    <groupId>com.restaurant</groupId>
+    <artifactId>management</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>app-gestionale</name>
-    <description>Software Gestionale Completo</description>
+    <name>restaurant-management</name>
+    <description>Gestionale per le ordinazioni</description>
 
     <properties>
         <java.version>17</java.version>
