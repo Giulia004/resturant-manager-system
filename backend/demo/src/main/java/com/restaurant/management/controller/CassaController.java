@@ -24,13 +24,14 @@ public class CassaController {
         this.repository = repository;
     }
 
-    //Report Giornaliero
-    @GetMapping("/report-giornaliero")
-    public Map<String, Double> getReportGiornaliero() {
-        List<Ordine> todayOrders = repository.findOrdiniPagatiOggi(StatoOrdine.PAGATO);
-
-        return todayOrders.stream().collect(
-                Collectors.groupingBy(o->o.getMetodoPagamento()!=null ? o.getMetodoPagamento(): "N/D", Collectors.summingDouble(Ordine::getTotale)));
-    }
+    @GetMapping("/report-storico")
+    public Map<String, Double> getReportStorico() {
+        List<Ordine> allOrders = repository.findByStato(StatoOrdine.PAGATO);
+        return allOrders.stream().collect(
+            Collectors.groupingBy(
+                (Ordine o) -> o.getMetodoPagamento() != null ? o.getMetodoPagamento() : "N/D",
+                Collectors.summingDouble(Ordine::getTotale)));
+   }
+    
     
 }

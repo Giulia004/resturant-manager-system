@@ -20,7 +20,10 @@ export class CassaDashboardComponent implements OnInit, AfterViewInit {
   private platformId = inject(PLATFORM_ID);
 
   ordini = signal<Ordine[]>([]);
-  reportGiornaliero = signal<Map<string, number>>(new Map());
+
+  reportTotale = signal<Map<string, number>>(new Map());
+  ordiniPagatiStorico = signal<Ordine[]>([]);
+
   loading = signal<boolean>(true);
   ordineSelezionato = signal<Ordine | null>(null);
 
@@ -30,9 +33,11 @@ export class CassaDashboardComponent implements OnInit, AfterViewInit {
   metodoPagamento = signal<'CONTANTI' | 'POS'>('CONTANTI');
   importoRicevuto = signal<number | null>(null);
 
+  // Filtri
+  filtroPeriodo = signal<'OGGI' | 'TUTTI'>('OGGI');
+
   private chartInstance: any = null;
   private modalInstance: any = null;
-
 
   ngOnInit(): void {
     this.loadData();
@@ -52,7 +57,6 @@ export class CassaDashboardComponent implements OnInit, AfterViewInit {
   loadData(): void {
     this.loading.set(true);
 
-    // Carico gli ordini
     this.ordineService.getAll().subscribe({
       next: (res) => {
         this.ordini.set(res);
@@ -63,13 +67,21 @@ export class CassaDashboardComponent implements OnInit, AfterViewInit {
       }
     });
 
-    // Caricamento report giornaliero di cassa
-    this.cassaService.getReportGiornaliero().subscribe({
-      next: (report) => {
-        this.reportGiornaliero.set(new Map(Object.entries(report)));
-        if (isPlatformBrowser(this.platformId))
+    this.cassaService.getReportStorico().subscribe({
+      next: (reportData: any) => {
+        if (reportData && !Array.isArray(reportData)) {
+          this.reportTotale.set(new Map(Object.entries(reportData)));
+        }
+        // Se invece l'endpoint restituisce la lista degli ordini pagati, puoi mapparli qui
+        else if (Array.isArray(reportData)) {
+          this.ordiniPagatiStorico.set(reportData);
+        }
+
+        if (isPlatformBrowser(this.platformId)) {
           setTimeout(() => this.initGrafico(), 50);
-      }, error: (err) => console.error('Errore nel caricamento report:', err)
+        }
+      },
+      error: (err) => console.error("Errore nel caricamento dei dati dal server", err)
     });
   }
 
@@ -77,7 +89,7 @@ export class CassaDashboardComponent implements OnInit, AfterViewInit {
     const canvas = document.getElementById('metodiPagamentoChart') as HTMLCanvasElement;
     if (!canvas) return;
 
-    const report = this.reportGiornaliero();
+    const report = this.reportAttivo;
     const labels = Array.from(report.keys());
     const data = Array.from(report.values());
 
@@ -125,7 +137,6 @@ export class CassaDashboardComponent implements OnInit, AfterViewInit {
     }
   }
 
-  // Getter per calcolare lo sconto effettivo in Euro (convertendo anche la percentuale se scelta)
   get scontoEffettivoInEuro(): number {
     const ordine = this.ordineSelezionato();
     if (!ordine) return 0;
@@ -151,10 +162,7 @@ export class CassaDashboardComponent implements OnInit, AfterViewInit {
   }
 
   impostaTaglio(valore: number): void {
-    if (valore === this.totaleFinale)
-      this.importoRicevuto.set(Number(this.totaleFinale.toFixed(2)));
-    else
-      this.importoRicevuto.set(valore);
+    this.importoRicevuto.set(Number(this.totaleFinale.toFixed(2)));
   }
 
   confermaPagamento(): void {
@@ -195,15 +203,43 @@ export class CassaDashboardComponent implements OnInit, AfterViewInit {
     return this.ordini().filter(o => o.stato === 'SERVITO');
   }
 
-  get totaleIncassatoOggi(): number {
+  get reportGiornaliero(): Map<string, number> {
+    const map = new Map<string, number>();
+    const oggiStr = new Date().toISOString().split('T')[0];
+
+    const ordiniPagati = this.ordiniPagatiStorico();
+    const ordiniOggi = ordiniPagati.filter(o => o.dataCreazione && o.dataCreazione.startsWith(oggiStr));
+
+    ordiniOggi.forEach(ordine => {
+      const metodo = ordine.metodoPagamento || 'N/D';
+      const corrente = map.get(metodo) || 0;
+      map.set(metodo, corrente + (ordine.totale || 0));
+    });
+
+    return map;
+  }
+
+  get reportAttivo(): Map<string, number> {
+    return this.filtroPeriodo() === 'OGGI' ? this.reportGiornaliero : this.reportTotale();
+  }
+
+  get totaleIncassatoDisplay(): number {
     let totale = 0;
-    this.reportGiornaliero().forEach((valore) => totale += valore);
+    this.reportAttivo.forEach((valore) => totale += valore);
     return totale;
   }
 
   get totaleScontiOggi(): number {
-    return this.ordini()
-      .filter(o => o.stato === 'PAGATO')
+    const oggiStr = new Date().toISOString().split('T')[0];
+    return this.ordiniPagatiStorico()
+      .filter(o => o.stato === 'PAGATO' && o.dataCreazione && o.dataCreazione.startsWith(oggiStr))
       .reduce((acc, o) => acc + (o.sconto || 0), 0);
+  }
+
+  cambiaFiltro(periodo: 'OGGI' | 'TUTTI'): void {
+    this.filtroPeriodo.set(periodo);
+    if (isPlatformBrowser(this.platformId)) {
+      setTimeout(() => this.initGrafico(), 50);
+    }
   }
 }

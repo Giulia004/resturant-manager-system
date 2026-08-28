@@ -1,61 +1,94 @@
 services:
-  # 1. DATABASE (MySQL)
+
+  # 1. DATABASE - MySQL
   db_ristorante:
     image: mysql:8.0
-    container_name: mysql_ristorante
+    container_name: mysql_ristorante_dev
+
     environment:
-      # Configura qui le credenziali del tuo database
       MYSQL_ROOT_PASSWORD: P@zziCraft4000
       MYSQL_DATABASE: resturant
+
     ports:
       - "3307:3306"
+
     volumes:
-      # Mantiene i dati persistenti sul tuo PC anche se spegni il container
-      - data_ristorante:/var/lib/mysql
+      - data_ristorante_dev:/var/lib/mysql
+
     networks:
-      - rete_ristorante
+      - rete_ristorante_dev
+
     healthcheck:
-      # Il backend deve aspettare che MySQL sia davvero pronto ad accettare
-      # connessioni, non solo che il container sia partito.
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-pP@zziCraft4000"]
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-uroot",
+          "-pP@zziCraft4000"
+        ]
       interval: 5s
       timeout: 5s
       retries: 10
       start_period: 20s
 
-  # 2. BACKEND (Spring Boot)
+
+  # 2. BACKEND - Spring Boot
   backend_ristorante:
-    # Cerca il Dockerfile dentro la cartella "backend" (cambia il nome se la tua cartella si chiama diversamente)
-    build: ./backend/demo 
-    container_name: spring_ristorante
+    build:
+      context: ./backend/demo
+
+    container_name: spring_ristorante_dev
+
     ports:
       - "8000:8000"
+
     environment:
-      # Sovrascrive l'URL di Spring Boot per puntare al container MySQL usando il nome del servizio "db_ristorante"
-      - SPRING_DATASOURCE_URL=jdbc:mysql://db_ristorante:3306/resturant?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true
-      - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=P@zziCraft4000
+      SPRING_DATASOURCE_URL: jdbc:mysql://db_ristorante:3306/resturant?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: P@zziCraft4000
+
     depends_on:
       db_ristorante:
         condition: service_healthy
-    networks:
-      - rete_ristorante
 
-  # 3. FRONTEND (Angular)
+    networks:
+      - rete_ristorante_dev
+
+
+  # 3. FRONTEND - Angular DEV
   frontend_ristorante:
-    build: 
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: angular_ristorante
+    image: node:20-alpine
+    container_name: angular_ristorante_dev
+    working_dir: /app
+
     ports:
-    - "4200:80"
+      - "4200:4200"
+
+    volumes:
+      - ./frontend:/app
+      - angular_node_modules:/app/node_modules
+
+    command:
+      sh -c "npm install &&
+            npm start -- --host 0.0.0.0"
+
     depends_on:
-    - backend_ristorante
+      - backend_ristorante
+
     networks:
-    - rete_ristorante
+      - rete_ristorante_dev
 
+
+# VOLUMI
 volumes:
-  data_ristorante:
+  data_ristorante_dev:
+  angular_node_modules:
 
+
+# NETWORK
 networks:
-  rete_ristorante:
+  rete_ristorante_dev:
+    driver: bridge

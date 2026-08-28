@@ -12,6 +12,7 @@ import { AuthService } from '../../services/auth.service';
   templateUrl: './comande.component.html',
   styleUrl: './comande.component.css',
 })
+
 export class ComandeComponent implements OnInit {
   private ordiniService = inject(OrdineService);
   private authService = inject(AuthService);
@@ -39,7 +40,7 @@ export class ComandeComponent implements OnInit {
     const ricerca = this.ricercaTavolo();
 
     return list.filter(ordine => {
-      //Match per stato
+      //Match con lo stato
       const matchStato = stato === 'TUTTI' || ordine.stato === stato;
 
       //Filtro per numero tavolo

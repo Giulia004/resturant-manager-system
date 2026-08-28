@@ -1,6 +1,7 @@
 package com.restaurant.management.service;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -23,13 +24,13 @@ public class PiattoService {
     }
 
     public Piatto findPiattoById(Long id) {
-        return piattoRepository.findById(id)
+        return piattoRepository.findById(Objects.requireNonNull(id, "id"))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Il piatto non esiste"));
     }
 
     @Transactional
     public Piatto create(Piatto piatto) {
-        return piattoRepository.save(piatto);
+        return piattoRepository.save(Objects.requireNonNull(piatto, "piatto"));
     }
 
     @Transactional

@@ -79,7 +79,7 @@ export class TavoliComponent implements OnInit {
     const aggiornato = { disponibile: !tavolo.disponibile };
 
     this.tavoliService.updateTavolo(tavolo.id!, aggiornato).subscribe({
-      next: (res) => tavolo.disponibile = res.disponibile,
+      next: (res) => this.tavoli.update(list=>list.map(t=>t.id===res.id? res :t)),
       error: (err) => {
         this.snackBar.open('Errore durante l\'aggiornamento.', 'Chiudi', { duration: 3000 });
         console.error(err);

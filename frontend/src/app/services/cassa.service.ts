@@ -12,12 +12,12 @@ export class CassaService{
     private API = "http://localhost:8000/api/cassa";
     private API_ORDINI = "http://localhost:8000/api/ordini";
 
-    getReportGiornaliero():Observable<Map<String,number>> {
-        return this.http.get<Map<String, number>>(this.API + "/report-giornaliero", { headers: this.authService.getHeaders() });
-    }
-
     //Finalizza il pagamento di un ordine
     finalizzaPagamento(ordineId: number, pagamentoData: { metodoPagamento: string, importoScontato: number }): Observable<Ordine>{
         return this.http.post<Ordine>(`${this.API_ORDINI}/${ordineId}/pagamento`, pagamentoData, { headers: this.authService.getHeaders() });
+    }
+
+    getReportStorico(): Observable<Map<String, number>>{
+        return this.http.get<Map<String, number>>(`${this.API}/report-storico`, { headers: this.authService.getHeaders() });
     }
 }

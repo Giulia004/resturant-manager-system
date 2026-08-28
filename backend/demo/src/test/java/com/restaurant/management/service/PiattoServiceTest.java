@@ -89,7 +89,8 @@ public class PiattoServiceTest {
 
     @Test
     void testCreate() {
-        when(piattoRepository.save(any(Piatto.class))).thenReturn(piattoSample);
+        when(piattoRepository.save(org.mockito.ArgumentMatchers.<Piatto>any()))
+                .thenReturn(java.util.Objects.requireNonNull(piattoSample));
 
         Piatto result = piattoService.create(piattoSample);
 
@@ -108,7 +109,8 @@ public class PiattoServiceTest {
         updateDetails.setDisponibile(true);
 
         when(piattoRepository.findById(1L)).thenReturn(Optional.of(piattoSample));
-        when(piattoRepository.save(any(Piatto.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(piattoRepository.save(org.mockito.ArgumentMatchers.<Piatto>any()))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         Piatto result = piattoService.update(1L, updateDetails);
 
@@ -116,7 +118,7 @@ public class PiattoServiceTest {
         assertEquals("Pizza Completa", result.getNome());
         assertEquals(7.50, result.getPrezzo());
         verify(piattoRepository, times(1)).findById(1L);
-        verify(piattoRepository, times(1)).save(piattoSample);
+        verify(piattoRepository, times(1)).save(org.mockito.ArgumentMatchers.<Piatto>any());
     }
 
     @Test
@@ -154,6 +156,7 @@ public class PiattoServiceTest {
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
         assertEquals("Il piatto non esiste", exception.getReason());
         verify(piattoRepository, times(1)).existsById(99L);
-        verify(piattoRepository, never()).deleteById(99L);;
+        verify(piattoRepository, never()).deleteById(99L);
+        ;
     }
 }

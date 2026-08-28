@@ -1,6 +1,7 @@
 package com.restaurant.management.service;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -23,7 +24,7 @@ public class OrdineItemService {
     }
 
     public OrdineItem findById(Long id) {
-        return ordineItemRepository.findById(id)
+        return ordineItemRepository.findById(Objects.requireNonNull(id))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Nessuna corrispondenza trovata"));
     }
     

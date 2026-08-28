@@ -4,38 +4,59 @@ services:
   db_ristorante:
     image: mysql:8.0
     container_name: mysql_ristorante_dev
+
     environment:
       MYSQL_ROOT_PASSWORD: P@zziCraft4000
       MYSQL_DATABASE: resturant
+
     ports:
       - "3307:3306"
+
     volumes:
       - data_ristorante_dev:/var/lib/mysql
+
     networks:
       - rete_ristorante_dev
+
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-pP@zziCraft4000"]
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-uroot",
+          "-pP@zziCraft4000"
+        ]
       interval: 5s
       timeout: 5s
       retries: 10
       start_period: 20s
 
+
   # 2. BACKEND - Spring Boot
   backend_ristorante:
     build:
       context: ./backend/demo
+
     container_name: spring_ristorante_dev
+
     ports:
       - "8000:8000"
+
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://db_ristorante:3306/resturant?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: P@zziCraft4000
+
     depends_on:
       db_ristorante:
         condition: service_healthy
+
     networks:
       - rete_ristorante_dev
+
 
   # 3. FRONTEND - Angular DEV
   frontend_ristorante:
@@ -50,9 +71,9 @@ services:
       - ./frontend:/app
       - angular_node_modules:/app/node_modules
 
-    command: >
+    command:
       sh -c "npm install &&
-             npm start"
+            npm start -- --host 0.0.0.0"
 
     depends_on:
       - backend_ristorante
@@ -60,9 +81,14 @@ services:
     networks:
       - rete_ristorante_dev
 
+
+# VOLUMI
 volumes:
   data_ristorante_dev:
   angular_node_modules:
 
+
+# NETWORK
 networks:
   rete_ristorante_dev:
+    driver: bridge

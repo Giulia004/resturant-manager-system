@@ -2,22 +2,46 @@
 
   <!-- Header & Indicatori di Cassa -->
   <div class="row mb-4 align-items-center">
-    <div class="col-12 col-lg-8">
+    <div class="col-12 col-lg-7">
       <div class="d-flex align-items-center gap-2 mb-1">
         <span class="badge bg-primary-subtle text-primary px-2 py-1 rounded-pill fw-semibold" style="font-size: 0.7rem;">
           <i class="fa-solid fa-cash-register me-1"></i> Workstation Cassa
         </span>
       </div>
       <h1 class="fw-bold mb-1 text-dark fs-3">Gestione Pagamenti & Contabilità</h1>
-      <p class="text-muted small mb-0">Monitora gli incassi giornalieri e finalizza i conti dei tavoli.</p>
+      <p class="text-muted small mb-0">Monitora gli incassi e finalizza i conti dei tavoli.</p>
     </div>
 
-    <!-- Widget Totale Incassato Oggi -->
-    <div class="col-12 col-lg-4 mt-3 mt-lg-0">
+    <!-- Selettore Filtro Periodo (Oggi / Tutti) -->
+    <div class="col-12 col-lg-5 mt-3 mt-lg-0 d-flex justify-content-lg-end">
+      <div class="btn-group bg-white p-1 rounded-pill shadow-sm border" role="group">
+        <button type="button" 
+                class="btn btn-sm rounded-pill px-4 fw-semibold"
+                [class.btn-dark]="filtroPeriodo() === 'OGGI'"
+                [class.btn-light]="filtroPeriodo() !== 'OGGI'"
+                (click)="cambiaFiltro('OGGI')">
+          Oggi
+        </button>
+        <button type="button" 
+                class="btn btn-sm rounded-pill px-4 fw-semibold"
+                [class.btn-dark]="filtroPeriodo() === 'TUTTI'"
+                [class.btn-light]="filtroPeriodo() !== 'TUTTI'"
+                (click)="cambiaFiltro('TUTTI')">
+          Tutti (Storico)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Riga Widget Totale Incassato Dinamico -->
+  <div class="row mb-4">
+    <div class="col-12">
       <div class="card border-0 shadow-sm rounded-4 p-3 bg-white d-flex flex-row align-items-center justify-content-between">
         <div>
-          <span class="text-muted small fw-semibold d-block">Incasso Totale Oggi</span>
-          <h2 class="text-success fw-bold mb-0">€ {{ totaleIncassatoOggi | number:'1.2-2' }}</h2>
+          <span class="text-muted small fw-semibold d-block">
+            Incasso Totale ({{ filtroPeriodo() === 'OGGI' ? 'Giornata Odierna' : 'Storico Completo' }})
+          </span>
+          <h2 class="text-success fw-bold mb-0">€ {{ totaleIncassatoDisplay | number:'1.2-2' }}</h2>
         </div>
         <div class="bg-success-subtle text-success p-3 rounded-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
           <i class="fa-solid fa-wallet fs-4"></i>
@@ -47,7 +71,7 @@
     <!-- Grafico Metodi di Pagamento -->
     <div class="col-12 col-lg-8">
       <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
-        <h5 class="fw-bold text-dark mb-3 fs-5">Ripartizione Incassi</h5>
+        <h5 class="fw-bold text-dark mb-3 fs-5">Ripartizione Incassi ({{ filtroPeriodo() === 'OGGI' ? 'Oggi' : 'Storico' }})</h5>
         <div class="position-relative d-flex align-items-center justify-content-center" style="height: 180px;">
           <canvas id="metodiPagamentoChart"></canvas>
         </div>
@@ -55,13 +79,13 @@
     </div>
   </div>
 
-  <!-- Sezione Dettaglio Report Giornaliero per Metodo di Pagamento -->
+  <!-- Sezione Dettaglio Report per Metodo di Pagamento -->
   <div class="row mb-4">
     <div class="col-12">
       <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
         <h5 class="fw-bold text-dark mb-3 fs-5">Incassi per Metodo di Pagamento</h5>
         <div class="row g-3">
-          @for (entry of reportGiornaliero().entries(); track entry[0]) {
+          @for (entry of reportAttivo.entries(); track entry[0]) {
             <div class="col-12 col-md-6 col-lg-4">
               <div class="p-3 border rounded-3 bg-light d-flex justify-content-between align-items-center">
                 <div>
@@ -75,7 +99,7 @@
             </div>
           } @empty {
             <div class="col-12 text-center text-muted py-3 small">
-              Nessun incasso registrato per la giornata odierna.
+              Nessun incasso registrato per il periodo selezionato.
             </div>
           }
         </div>
@@ -113,7 +137,7 @@
             @for (ordine of ordiniDaSaldare; track ordine.id) {
               <tr>
                 <td class="fw-bold text-dark">
-                  Tavolo {{ ordine.numeroTavolo || ordine.tavolo?.numero || 'N.D.' }}
+                  Tavolo {{ ordine.numeroTavolo || ordine.tavolo.numero || 'N.D.' }}
                 </td>
                 <td class="text-muted small">
                   {{ ordine.dataCreazione | date:'HH:mm' }}
